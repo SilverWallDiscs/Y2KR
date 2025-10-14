@@ -21,7 +21,7 @@ body {
 }
 
 .navbar-dark {
-  background: linear-gradient(135deg, var(--brand-dark) 0%, #2c3e50 100%) !important;
+  background: linear-gradient(135deg, var(--brand-dark) 0%, #221fcc 100%) !important;
 }
 
 /* Cards de productos mejoradas */
