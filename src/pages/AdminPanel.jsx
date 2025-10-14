@@ -1,31 +1,128 @@
 import React, { useState, useEffect } from 'react'
-import { Container, Row, Col, Card, Form, Button, Alert, Tab, Tabs } from 'react-bootstrap'
+import { Container, Row, Col, Card, Form, Button, Alert, Tab, Tabs, Table, Modal, Badge } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 
 export default function AdminPanel() {
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
+  const [showModal, setShowModal] = useState(false)
+  const [editingProduct, setEditingProduct] = useState(null)
   const [newProduct, setNewProduct] = useState({
     nombre: '',
     precio: '',
     imagen: '',
     categoria: '',
-    descripcion: ''
+    descripcion: '',
+    stock: ''
   })
   const [message, setMessage] = useState({ text: '', type: '' })
 
   useEffect(() => {
-    // Verificar si el admin está logueado
     if (!localStorage.getItem('adminLoggedIn')) {
       navigate('/admin')
       return
     }
     loadProducts()
+    loadSalesData()
   }, [navigate])
+
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    totalValue: 0,
+    totalSales: 0,
+    revenue: 0,
+    lowStock: 0
+  })
 
   const loadProducts = () => {
     const adminProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]')
-    setProducts(adminProducts)
+    const defaultProducts = [
+      {
+        id: 1,
+        nombre: "Remera Oversize",
+        precio: 3500,
+        imagen: "/assets/producto1.webp",
+        categoria: "remeras",
+        descripcion: "Remera oversize cómoda y estilo urbano",
+        stock: 15
+      },
+      {
+        id: 2,
+        nombre: "Campera Y2K",
+        precio: 12000,
+        imagen: "/assets/producto2.webp",
+        categoria: "camperas",
+        descripcion: "Campera estilo años 2000",
+        stock: 8
+      },
+      {
+        id: 3,
+        nombre: "Pantalón Cargo",
+        precio: 8700,
+        imagen: "/assets/producto3.webp",
+        categoria: "pantalones",
+        descripcion: "Pantalón cargo con múltiples bolsillos",
+        stock: 12
+      },
+      {
+        id: 4,
+        nombre: "Gorra Estilo Retro",
+        precio: 2900,
+        imagen: "/assets/producto4.webp",
+        categoria: "accesorios",
+        descripcion: "Gorra retro para completar tu look",
+        stock: 20
+      },
+      {
+        id: 5,
+        nombre: "Baggy Jeans",
+        precio: 22900,
+        imagen: "/assets/producto5.webp",
+        categoria: "pantalones",
+        descripcion: "Jeans baggy estilo vintage",
+        stock: 6
+      },
+      {
+        id: 6,
+        nombre: "Jeans True Religion",
+        precio: 29900,
+        imagen: "/assets/producto6.webp",
+        categoria: "pantalones",
+        descripcion: "Jeans de alta calidad marca True Religion",
+        stock: 4
+      },
+      {
+        id: 7,
+        nombre: "Pantalon RealTree",
+        precio: 14900,
+        imagen: "/assets/producto7.webp",
+        categoria: "pantalones",
+        descripcion: "Pantalón camuflaje RealTree",
+        stock: 10
+      }
+    ]
+    
+    const allProducts = [...defaultProducts, ...adminProducts]
+    setProducts(allProducts)
+  }
+
+  const loadSalesData = () => {
+    // Datos de ejemplo para estadísticas
+    const salesData = JSON.parse(localStorage.getItem('salesData') || '[]')
+    const totalSales = salesData.reduce((sum, sale) => sum + sale.amount, 0)
+    const revenue = salesData.reduce((sum, sale) => sum + sale.revenue, 0)
+    
+    const allProducts = products.length > 0 ? products : JSON.parse(localStorage.getItem('adminProducts') || '[]')
+    const totalValue = allProducts.reduce((sum, p) => sum + (p.precio * (p.stock || 1)), 0)
+    const lowStock = allProducts.filter(p => (p.stock || 0) < 5).length
+
+    setStats({
+      totalProducts: allProducts.length,
+      totalValue: totalValue,
+      totalSales: salesData.length,
+      revenue: revenue,
+      lowStock: lowStock
+    })
   }
 
   const handleInputChange = (e) => {
@@ -44,23 +141,51 @@ export default function AdminPanel() {
     }
 
     const product = {
-      id: Date.now(),
+      id: editingProduct ? editingProduct.id : Date.now(),
       nombre: newProduct.nombre,
       precio: parseFloat(newProduct.precio),
       imagen: newProduct.imagen,
       categoria: newProduct.categoria,
-      descripcion: newProduct.descripcion
+      descripcion: newProduct.descripcion,
+      stock: parseInt(newProduct.stock) || 0
     }
 
     const adminProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]')
-    adminProducts.push(product)
-    localStorage.setItem('adminProducts', JSON.stringify(adminProducts))
+    
+    if (editingProduct) {
+      // Editar producto existente
+      const updatedProducts = adminProducts.map(p => 
+        p.id === editingProduct.id ? product : p
+      )
+      localStorage.setItem('adminProducts', JSON.stringify(updatedProducts))
+      setMessage({ text: 'Producto actualizado correctamente', type: 'success' })
+    } else {
+      // Agregar nuevo producto
+      adminProducts.push(product)
+      localStorage.setItem('adminProducts', JSON.stringify(adminProducts))
+      setMessage({ text: 'Producto agregado correctamente', type: 'success' })
+    }
 
-    setMessage({ text: 'Producto agregado correctamente', type: 'success' })
-    setNewProduct({ nombre: '', precio: '', imagen: '', categoria: '', descripcion: '' })
+    setNewProduct({ nombre: '', precio: '', imagen: '', categoria: '', descripcion: '', stock: '' })
+    setEditingProduct(null)
+    setShowModal(false)
     loadProducts()
+    loadSalesData()
 
     setTimeout(() => setMessage({ text: '', type: '' }), 3000)
+  }
+
+  const handleEditProduct = (product) => {
+    setEditingProduct(product)
+    setNewProduct({
+      nombre: product.nombre,
+      precio: product.precio,
+      imagen: product.imagen,
+      categoria: product.categoria,
+      descripcion: product.descripcion || '',
+      stock: product.stock || ''
+    })
+    setShowModal(true)
   }
 
   const handleDeleteProduct = (productId) => {
@@ -69,14 +194,42 @@ export default function AdminPanel() {
       const updatedProducts = adminProducts.filter(p => p.id !== productId)
       localStorage.setItem('adminProducts', JSON.stringify(updatedProducts))
       loadProducts()
+      loadSalesData()
       setMessage({ text: 'Producto eliminado correctamente', type: 'success' })
       setTimeout(() => setMessage({ text: '', type: '' }), 3000)
     }
   }
 
+  const handleCloseModal = () => {
+    setShowModal(false)
+    setEditingProduct(null)
+    setNewProduct({ nombre: '', precio: '', imagen: '', categoria: '', descripcion: '', stock: '' })
+  }
+
   const handleLogout = () => {
     localStorage.removeItem('adminLoggedIn')
     navigate('/')
+  }
+
+  const generateSalesReport = () => {
+    // Generar reporte de ventas simulado
+    const report = {
+      fecha: new Date().toLocaleDateString(),
+      totalProductos: stats.totalProducts,
+      valorInventario: stats.totalValue,
+      ventasTotales: stats.totalSales,
+      ingresos: stats.revenue
+    }
+    
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `reporte-ventas-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    
+    setMessage({ text: 'Reporte descargado correctamente', type: 'success' })
+    setTimeout(() => setMessage({ text: '', type: '' }), 3000)
   }
 
   return (
@@ -87,15 +240,16 @@ export default function AdminPanel() {
             <Card.Header className="d-flex justify-content-between align-items-center">
               <h2 className="mb-0">
                 <i className="fas fa-cog me-2"></i>
-                Panel de Administración
+                Panel de Administración - KorteY2K
               </h2>
               <Button variant="outline-danger" onClick={handleLogout}>
+                <i className="fas fa-sign-out-alt me-2"></i>
                 Cerrar Sesión
               </Button>
             </Card.Header>
             <Card.Body>
               <p className="text-muted mb-0">
-                Gestiona los productos y contenido de tu tienda
+                Gestiona los productos, inventario y ventas de tu tienda de ropa Y2K
               </p>
             </Card.Body>
           </Card>
@@ -108,124 +262,180 @@ export default function AdminPanel() {
         </Alert>
       )}
 
-      <Tabs defaultActiveKey="products" className="mb-4">
-        <Tab eventKey="products" title="Gestionar Productos">
+      <Tabs defaultActiveKey="stats" className="mb-4">
+        <Tab eventKey="stats" title={
+          <span>
+            <i className="fas fa-chart-bar me-2"></i>
+            Estadísticas
+          </span>
+        }>
           <Row>
-            <Col md={6}>
-              <Card>
-                <Card.Header>
-                  <h5 className="mb-0">
-                    <i className="fas fa-plus-circle me-2"></i>
-                    Agregar Nuevo Producto
-                  </h5>
-                </Card.Header>
+            <Col md={3} className="mb-3">
+              <Card className="text-center border-0 shadow-sm">
                 <Card.Body>
-                  <Form onSubmit={handleAddProduct}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Nombre del Producto *</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="nombre"
-                        value={newProduct.nombre}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                      <Form.Label>Precio *</Form.Label>
-                      <Form.Control
-                        type="number"
-                        name="precio"
-                        value={newProduct.precio}
-                        onChange={handleInputChange}
-                        min="0"
-                        step="0.01"
-                        required
-                      />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                      <Form.Label>URL de la Imagen *</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="imagen"
-                        value={newProduct.imagen}
-                        onChange={handleInputChange}
-                        placeholder="https://ejemplo.com/imagen.jpg"
-                        required
-                      />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                      <Form.Label>Categoría *</Form.Label>
-                      <Form.Select
-                        name="categoria"
-                        value={newProduct.categoria}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Seleccionar categoría</option>
-                        <option value="remeras">Remeras</option>
-                        <option value="camperas">Camperas</option>
-                        <option value="pantalones">Pantalones</option>
-                        <option value="accesorios">Accesorios</option>
-                      </Form.Select>
-                    </Form.Group>
-
-                    <Form.Group className="mb-4">
-                      <Form.Label>Descripción</Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={3}
-                        name="descripcion"
-                        value={newProduct.descripcion}
-                        onChange={handleInputChange}
-                      />
-                    </Form.Group>
-
-                    <Button type="submit" variant="primary" className="w-100">
-                      <i className="fas fa-save me-2"></i>
-                      Guardar Producto
-                    </Button>
-                  </Form>
+                  <div className="text-primary mb-2">
+                    <i className="fas fa-tshirt fa-2x"></i>
+                  </div>
+                  <h3 className="text-primary">{stats.totalProducts}</h3>
+                  <p className="text-muted mb-0">Productos Totales</p>
                 </Card.Body>
               </Card>
             </Col>
+            
+            <Col md={3} className="mb-3">
+              <Card className="text-center border-0 shadow-sm">
+                <Card.Body>
+                  <div className="text-success mb-2">
+                    <i className="fas fa-dollar-sign fa-2x"></i>
+                  </div>
+                  <h3 className="text-success">${stats.totalValue.toLocaleString('es-CL')}</h3>
+                  <p className="text-muted mb-0">Valor Inventario</p>
+                </Card.Body>
+              </Card>
+            </Col>
+            
+            <Col md={3} className="mb-3">
+              <Card className="text-center border-0 shadow-sm">
+                <Card.Body>
+                  <div className="text-warning mb-2">
+                    <i className="fas fa-shopping-cart fa-2x"></i>
+                  </div>
+                  <h3 className="text-warning">{stats.totalSales}</h3>
+                  <p className="text-muted mb-0">Ventas Totales</p>
+                </Card.Body>
+              </Card>
+            </Col>
+            
+            <Col md={3} className="mb-3">
+              <Card className="text-center border-0 shadow-sm">
+                <Card.Body>
+                  <div className="text-danger mb-2">
+                    <i className="fas fa-exclamation-triangle fa-2x"></i>
+                  </div>
+                  <h3 className="text-danger">{stats.lowStock}</h3>
+                  <p className="text-muted mb-0">Stock Bajo</p>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
 
-            <Col md={6}>
+          <Row className="mt-4">
+            <Col>
               <Card>
-                <Card.Header>
-                  <h5 className="mb-0">
-                    <i className="fas fa-list me-2"></i>
-                    Productos Agregados ({products.length})
-                  </h5>
+                <Card.Header className="d-flex justify-content-between align-items-center">
+                  <h5 className="mb-0">Resumen de Ventas</h5>
+                  <Button variant="outline-primary" size="sm" onClick={generateSalesReport}>
+                    <i className="fas fa-download me-2"></i>
+                    Logor Reporte
+                  </Button>
+                </Card.Header>
+                <Card.Body>
+                  <Row>
+                    <Col md={6}>
+                      <h6>Ingresos Totales</h6>
+                      <h3 className="text-success">${stats.revenue.toLocaleString('es-CL')}</h3>
+                    </Col>
+                    <Col md={6}>
+                      <h6>Productos con Stock Bajo</h6>
+                      <div>
+                        {products.filter(p => (p.stock || 0) < 5).map(product => (
+                          <Badge key={product.id} bg="danger" className="me-2 mb-2">
+                            {product.nombre} ({product.stock})
+                          </Badge>
+                        ))}
+                        {products.filter(p => (p.stock || 0) < 5).length === 0 && (
+                          <span className="text-success">Todo el stock está en niveles óptimos</span>
+                        )}
+                      </div>
+                    </Col>
+                  </Row>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </Tab>
+
+        <Tab eventKey="products" title={
+          <span>
+            <i className="fas fa-boxes me-2"></i>
+            Gestión de Productos
+          </span>
+        }>
+          <Row className="mb-4">
+            <Col>
+              <Card>
+                <Card.Header className="d-flex justify-content-between align-items-center">
+                  <h5 className="mb-0">Lista de Productos</h5>
+                  <Button variant="primary" onClick={() => setShowModal(true)}>
+                    <i className="fas fa-plus me-2"></i>
+                    Agregar Producto
+                  </Button>
                 </Card.Header>
                 <Card.Body>
                   {products.length === 0 ? (
-                    <p className="text-muted text-center">No hay productos agregados</p>
+                    <p className="text-muted text-center py-4">No hay productos en la tienda</p>
                   ) : (
-                    <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
-                      {products.map(product => (
-                        <Card key={product.id} className="mb-3">
-                          <Card.Body>
-                            <div className="d-flex justify-content-between align-items-start">
-                              <div>
-                                <h6 className="mb-1">{product.nombre}</h6>
-                                <p className="mb-1 text-muted">${product.precio}</p>
-                                <small className="text-muted">Categoría: {product.categoria}</small>
-                              </div>
-                              <Button
-                                variant="outline-danger"
-                                size="sm"
-                                onClick={() => handleDeleteProduct(product.id)}
-                              >
-                                <i className="fas fa-trash"></i>
-                              </Button>
-                            </div>
-                          </Card.Body>
-                        </Card>
-                      ))}
+                    <div className="table-responsive">
+                      <Table hover>
+                        <thead>
+                          <tr>
+                            <th>Imagen</th>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                            <th>Categoría</th>
+                            <th>Stock</th>
+                            <th>Acciones</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {products.map(product => (
+                            <tr key={product.id}>
+                              <td>
+                                <img 
+                                  src={product.imagen} 
+                                  alt={product.nombre}
+                                  style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                  onError={(e) => {
+                                    e.target.src = 'https://via.placeholder.com/50x50?text=Imagen'
+                                  }}
+                                />
+                              </td>
+                              <td>
+                                <strong>{product.nombre}</strong>
+                                {product.descripcion && (
+                                  <small className="text-muted">{product.descripcion}</small>
+                                )}
+                              </td>
+                              <td>${product.precio.toLocaleString('es-CL')}</td>
+                              <td>
+                                <Badge bg="primary">{product.categoria}</Badge>
+                              </td>
+                              <td>
+                                <Badge bg={(product.stock || 0) < 5 ? "danger" : "success"}>
+                                  {product.stock || 0}
+                                </Badge>
+                              </td>
+                              <td>
+                                <Button
+                                  variant="outline-primary"
+                                  size="sm"
+                                  className="me-2"
+                                  onClick={() => handleEditProduct(product)}
+                                >
+                                  <i className="fas fa-edit"></i>
+                                </Button>
+                                <Button
+                                  variant="outline-danger"
+                                  size="sm"
+                                  onClick={() => handleDeleteProduct(product.id)}
+                                >
+                                  <i className="fas fa-trash"></i>
+                                </Button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
                     </div>
                   )}
                 </Card.Body>
@@ -233,28 +443,117 @@ export default function AdminPanel() {
             </Col>
           </Row>
         </Tab>
-
-        <Tab eventKey="stats" title="Estadísticas">
-          <Row>
-            <Col md={3} className="mb-3">
-              <Card className="text-center">
-                <Card.Body>
-                  <h3>{products.length}</h3>
-                  <p className="text-muted mb-0">Productos Totales</p>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={3} className="mb-3">
-              <Card className="text-center">
-                <Card.Body>
-                  <h3>${products.reduce((sum, p) => sum + p.precio, 0).toLocaleString()}</h3>
-                  <p className="text-muted mb-0">Valor Total Inventario</p>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        </Tab>
       </Tabs>
+
+      {/* Modal para agregar/editar producto */}
+      <Modal show={showModal} onHide={handleCloseModal} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <i className="fas fa-box me-2"></i>
+            {editingProduct ? 'Editar Producto' : 'Agregar Nuevo Producto'}
+          </Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={handleAddProduct}>
+          <Modal.Body>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Nombre del Producto *</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="nombre"
+                    value={newProduct.nombre}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="Ej: Remera Oversize Negra"
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Precio *</Form.Label>
+                  <Form.Control
+                    type="number"
+                    name="precio"
+                    value={newProduct.precio}
+                    onChange={handleInputChange}
+                    min="0"
+                    step="0.01"
+                    required
+                    placeholder="Ej: 3500"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Form.Group className="mb-3">
+              <Form.Label>URL de la Imagen *</Form.Label>
+              <Form.Control
+                type="text"
+                name="imagen"
+                value={newProduct.imagen}
+                onChange={handleInputChange}
+                placeholder="https://ejemplo.com/imagen.jpg"
+                required
+              />
+            </Form.Group>
+
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Categoría *</Form.Label>
+                  <Form.Select
+                    name="categoria"
+                    value={newProduct.categoria}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Seleccionar categoría</option>
+                    <option value="remeras">👚 Remeras</option>
+                    <option value="camperas">🧥 Camperas</option>
+                    <option value="pantalones">👖 Pantalones</option>
+                    <option value="accesorios">🧢 Accesorios</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Stock</Form.Label>
+                  <Form.Control
+                    type="number"
+                    name="stock"
+                    value={newProduct.stock}
+                    onChange={handleInputChange}
+                    min="0"
+                    placeholder="Cantidad en stock"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Descripción</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                name="descripcion"
+                value={newProduct.descripcion}
+                onChange={handleInputChange}
+                placeholder="Describe el producto..."
+              />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseModal}>
+              Cancelar
+            </Button>
+            <Button type="submit" variant="primary">
+              <i className="fas fa-save me-2"></i>
+              {editingProduct ? 'Actualizar Producto' : 'Guardar Producto'}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
     </Container>
   )
 }

@@ -4,8 +4,7 @@ import { LinkContainer } from 'react-router-bootstrap'
 import { useAuth } from '../auth/AuthContext'
 
 export default function AppNavbar() {
-  const { currentUser, logout } = useAuth()
-  const cartItems = JSON.parse(localStorage.getItem('tg_cart') || '[]')
+  const { currentUser, logout, carrito } = useAuth()
 
   const handleLogout = () => {
     logout()
@@ -17,7 +16,7 @@ export default function AppNavbar() {
         <LinkContainer to="/">
           <Navbar.Brand>
             <img
-              src="/assets/descarga.png"
+              src="/assets/Logo.png"
               width="30"
               height="30"
               className="d-inline-block align-top me-2"
@@ -45,9 +44,9 @@ export default function AppNavbar() {
             <LinkContainer to="/carrito">
               <Nav.Link>
                 🛒 Carrito
-                {cartItems.length > 0 && (
+                {carrito.length > 0 && (
                   <Badge bg="primary" className="ms-1">
-                    {cartItems.length}
+                    {carrito.reduce((total, item) => total + (item.cantidad || 1), 0)}
                   </Badge>
                 )}
               </Nav.Link>

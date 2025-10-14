@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
 import AppNavbar from './components/AppNavbar'
+import AppFooter from './components/AppFooter'
 import ProtectedRoute from './components/ProtectedRoute'
 import Home from './pages/Home'
 import Productos from './pages/Productos'
@@ -57,27 +58,32 @@ export default function App() {
     return (
         <AuthProvider>
             <Router>
-                <AppNavbar />
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/productos" element={<Productos onAdd={addToCart} />} />
-                    <Route path="/contacto" element={<Contacto />} />
-                    <Route path="/carrito" element={
-                        <ProtectedRoute>
-                            <Carrito 
-                                items={carrito} 
-                                onRemove={removeFromCart} 
-                                onClear={clearCart}
-                                onCheckout={handleCheckout}
-                            />
-                        </ProtectedRoute>
-                    } />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/admin" element={<AdminLogin />} />
-                    <Route path="/admin-panel" element={<AdminPanel />} />
-                    <Route path="*" element={<NotFound />} />
-                </Routes>
+                <div className="d-flex flex-column min-vh-100">
+                    <AppNavbar />
+                    <main className="flex-grow-1">
+                        <Routes>
+                            <Route path="/" element={<Home />} />
+                            <Route path="/productos" element={<Productos onAddToCart={addToCart} />} />
+                            <Route path="/contacto" element={<Contacto />} />
+                            <Route path="/carrito" element={
+                                <ProtectedRoute>
+                                    <Carrito 
+                                        items={carrito} 
+                                        onRemove={removeFromCart} 
+                                        onClear={clearCart}
+                                        onCheckout={handleCheckout}
+                                    />
+                                </ProtectedRoute>
+                            } />
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/register" element={<Register />} />
+                            <Route path="/admin" element={<AdminLogin />} />
+                            <Route path="/admin-panel" element={<AdminPanel />} />
+                            <Route path="*" element={<NotFound />} />
+                        </Routes>
+                    </main>
+                    <AppFooter />
+                </div>
             </Router>
         </AuthProvider>
     )

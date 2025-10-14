@@ -8,19 +8,35 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null)
+  const [carrito, setCarrito] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // Verificar si hay usuario en localStorage al cargar
     const user = localStorage.getItem('currentUser')
+    const cart = localStorage.getItem('tg_cart')
+    
     if (user) {
       setCurrentUser(JSON.parse(user))
     }
+    
+    if (cart) {
+      try {
+        setCarrito(JSON.parse(cart))
+      } catch (e) {
+        setCarrito([])
+      }
+    }
+    
     setLoading(false)
   }, [])
 
+  // Persistir carrito cuando cambie
+  useEffect(() => {
+    localStorage.setItem('tg_cart', JSON.stringify(carrito))
+  }, [carrito])
+
   const login = async (credentials) => {
-    // Simular autenticación
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         const users = JSON.parse(localStorage.getItem('users') || '[]')
@@ -51,7 +67,6 @@ export function AuthProvider({ children }) {
         try {
           const users = JSON.parse(localStorage.getItem('users') || '[]')
           
-          // Verificar si el usuario ya existe
           if (users.find(u => u.username === userData.username)) {
             reject(new Error('El usuario ya existe'))
             return
@@ -75,14 +90,54 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     setCurrentUser(null)
+    setCarrito([]) // Limpiar carrito al cerrar sesión
     localStorage.removeItem('currentUser')
+    localStorage.removeItem('tg_cart')
+  }
+
+  // Funciones del carrito
+  const addToCart = (item) => {
+    setCarrito(prev => {
+      const existingItem = prev.find(p => p.id === item.id)
+      if (existingItem) {
+        return prev.map(p => 
+          p.id === item.id 
+            ? { ...p, cantidad: (p.cantidad || 1) + 1 }
+            : p
+        )
+      }
+      return [...prev, { ...item, cantidad: 1 }]
+    })
+  }
+
+  const removeFromCart = (index) => {
+    setCarrito(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const clearCart = () => {
+    setCarrito([])
+  }
+
+  const updateCartItemQuantity = (index, newQuantity) => {
+    if (newQuantity < 1) return
+    
+    setCarrito(prev => 
+      prev.map((item, i) => 
+        i === index ? { ...item, cantidad: newQuantity } : item
+      )
+    )
   }
 
   const value = {
     currentUser,
+    carrito,
     login,
     register,
-    logout
+    logout,
+    addToCart,
+    removeFromCart,
+    clearCart,
+    updateCartItemQuantity
   }
 
   return (
