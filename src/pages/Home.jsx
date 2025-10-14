@@ -16,7 +16,7 @@ export default function Home() {
                style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>
         <h1 id="hero-heading">Descubre la nueva colección</h1>
         <p className="lead">Estilo, calidad y comodidad para cada momento.</p>
-        <a href="/tienda" className="btn btn-light btn-lg">Comprar ahora</a>
+        <a href="/Productos" className="btn btn-light btn-lg">Comprar ahora</a>
       </section>
       
       {/* Productos Destacados */}
@@ -29,7 +29,7 @@ export default function Home() {
               <Card.Body className="d-flex flex-column">
                 <Card.Title>Remera Oversize</Card.Title>
                 <Card.Text className="text-muted">$3.500</Card.Text>
-                <a href="/tienda" className="btn btn-primary mt-auto">Ver producto</a>
+                <a href="/Productos" className="btn btn-primary mt-auto">Ver producto</a>
               </Card.Body>
             </Card>
           </Col>
@@ -39,7 +39,7 @@ export default function Home() {
               <Card.Body className="d-flex flex-column">
                 <Card.Title>Campera Y2K</Card.Title>
                 <Card.Text className="text-muted">$12.000</Card.Text>
-                <a href="/tienda" className="btn btn-primary mt-auto">Ver producto</a>
+                <a href="/Productos" className="btn btn-primary mt-auto">Ver producto</a>
               </Card.Body>
             </Card>
           </Col>
@@ -49,7 +49,7 @@ export default function Home() {
               <Card.Body className="d-flex flex-column">
                 <Card.Title>Pantalón Cargo</Card.Title>
                 <Card.Text className="text-muted">$8.700</Card.Text>
-                <a href="/tienda" className="btn btn-primary mt-auto">Ver producto</a>
+                <a href="/Productos" className="btn btn-primary mt-auto">Ver producto</a>
               </Card.Body>
             </Card>
           </Col>
