@@ -66,33 +66,6 @@ export default function AppFooter() {
             </ul>
           </Col>
 
-          {/* Categorías */}
-          <Col lg={2} md={6} className="mb-4">
-            <h6 className="fw-bold mb-3">Categorías</h6>
-            <ul className="list-unstyled">
-              <li className="mb-2">
-                <a href="/productos" className="text-light text-decoration-none">
-                  👚 Remeras
-                </a>
-              </li>
-              <li className="mb-2">
-                <a href="/productos" className="text-light text-decoration-none">
-                  🧥 Camperas
-                </a>
-              </li>
-              <li className="mb-2">
-                <a href="/productos" className="text-light text-decoration-none">
-                  👖 Pantalones
-                </a>
-              </li>
-              <li className="mb-2">
-                <a href="/productos" className="text-light text-decoration-none">
-                  🧢 Accesorios
-                </a>
-              </li>
-            </ul>
-          </Col>
-
           {/* Contacto y Admin */}
           <Col lg={4} md={6} className="mb-4">
             <h6 className="fw-bold mb-3">Contacto & Admin</h6>
