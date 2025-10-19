@@ -6,8 +6,8 @@ export default function Home() {
     <Container>
       <Row className="mb-4">
         <Col>
-          <h1 className="page-title">Bienvenido a Tienda Gamer</h1>
-          <p className="muted">Videojuegos y artículos de computación con atención profesional.</p>
+          <h1 className="page-title">Bienvenido a KorteY2K</h1>
+          <p className="muted">Ropa y accesorios con estilo Y2K</p>
         </Col>
       </Row>
       

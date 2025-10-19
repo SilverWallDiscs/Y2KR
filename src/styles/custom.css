@@ -93,13 +93,46 @@ body {
   padding: 25px;
 }
 
-/* Badges de categorías */
+/* Badges de categorías MEJORADOS */
 .badge-categoria {
   background: linear-gradient(135deg, var(--fashion-pink) 0%, #d91a72 100%);
   color: white;
   border-radius: 20px;
   padding: 6px 12px;
   font-size: 0.75rem;
+}
+
+/* Filtros de categorías - ESTILOS NUEVOS */
+.categoria-filtro {
+  background: white;
+  border: 2px solid #e9ecef;
+  color: var(--brand-dark);
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 5px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+
+.categoria-filtro:hover {
+  border-color: var(--brand-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,.1);
+}
+
+.categoria-filtro.active {
+  background: linear-gradient(135deg, var(--brand-primary) 0%, #0a58ca 100%);
+  border-color: var(--brand-primary);
+  color: white;
+  box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+}
+
+.categoria-filtro .emoji {
+  font-size: 1.2rem;
+  margin-right: 8px;
 }
 
 /* Hero section */
@@ -183,6 +216,7 @@ body {
   font-weight: 700;
   margin-bottom: 2rem;
   background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-primary) 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-align: center;
@@ -210,6 +244,164 @@ body {
   margin-bottom: 0.5rem;
 }
 
+/* ===== ESTILOS PARA CONTACTO ===== */
+.main-contacto {
+  padding: 2rem 0;
+}
+
+.contacto-header h1 {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-primary) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.contacto-header .lead {
+  color: #6c757d;
+  font-size: 1.2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Tarjeta de formulario */
+.form-contacto {
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0,0,0,.08);
+  border: none;
+  height: 100%;
+}
+
+.form-contacto .card-title {
+  color: var(--brand-dark);
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.form-contacto .form-label {
+  font-weight: 600;
+  color: var(--brand-dark);
+  margin-bottom: 0.5rem;
+}
+
+/* Tarjeta de información de contacto */
+.info-contacto {
+  background: linear-gradient(135deg, var(--brand-dark) 0%, #2c3e50 100%) !important;
+  border: none;
+  border-radius: 16px;
+  height: 100%;
+}
+
+.info-contacto .card-title {
+  color: white !important;
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.info-contacto h5 {
+  color: white !important;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.info-contacto p {
+  color: rgba(255, 255, 255, 0.9) !important;
+  margin-bottom: 0.5rem;
+}
+
+.info-contacto a {
+  color: rgba(255, 255, 255, 0.9) !important;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.info-contacto a:hover {
+  color: white !important;
+  text-decoration: underline !important;
+}
+
+/* Items de contacto */
+.contacto-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.contacto-icono {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 1rem;
+}
+
+.contacto-icono i {
+  color: white;
+  font-size: 1rem;
+}
+
+/* Botón enviar */
+.btn-enviar {
+  background: linear-gradient(135deg, var(--brand-primary) 0%, #0a58ca 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-enviar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+  color: white;
+}
+
+/* Redes sociales */
+.redes-sociales h5 {
+  color: white !important;
+  margin-bottom: 1rem;
+}
+
+.social-icons a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.social-icons a:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  text-decoration: none !important;
+}
+
+/* Mapa */
+.card .card-header {
+  background: linear-gradient(135deg, var(--brand-dark) 0%, #2c3e50 100%);
+  color: white;
+  border: none;
+  border-radius: 16px 16px 0 0 !important;
+  padding: 1rem 1.5rem;
+}
+
+.card .card-header h4 {
+  margin-bottom: 0;
+  font-weight: 600;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .hero-section {
     padding: 40px 20px;
@@ -222,7 +414,35 @@ body {
   .card-img-top {
     height: 220px;
   }
+
+  .contacto-item {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .contacto-icono {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+    align-self: center;
+  }
+
+  .main-contacto {
+    padding: 1rem 0;
+  }
+
+  /* Filtros responsive */
+  .categoria-filtro {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    margin: 3px;
+  }
+
+  .categoria-filtro .emoji {
+    font-size: 1.1rem;
+    margin-right: 6px;
+  }
 }
+
 footer {
   margin-top: auto !important;
 }

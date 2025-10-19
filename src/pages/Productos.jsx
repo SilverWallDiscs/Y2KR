@@ -15,23 +15,23 @@ export default function Productos() {
         nombre: "Remera Oversize",
         precio: 3500,
         imagen: "/assets/producto1.webp",
-        categoria: "remeras",
-        descripcion: "Remera oversize cómoda y estilo urbano"
+        categoria: "Poleras",
+        descripcion: "Poleras oversize cómoda y estilo urbano"
       },
       {
         id: 2,
         nombre: "Campera Y2K",
         precio: 12000,
         imagen: "/assets/producto2.webp",
-        categoria: "camperas",
-        descripcion: "Campera estilo años 2000"
+        categoria: "Poleron",
+        descripcion: "Poleron estilo años 2000"
       },
       {
         id: 3,
         nombre: "Pantalón Cargo",
         precio: 8700,
         imagen: "/assets/producto3.webp",
-        categoria: "pantalones",
+        categoria: "Pantalones",
         descripcion: "Pantalón cargo con múltiples bolsillos"
       },
       {
@@ -39,7 +39,7 @@ export default function Productos() {
         nombre: "Gorra Estilo Retro",
         precio: 2900,
         imagen: "/assets/producto4.webp",
-        categoria: "accesorios",
+        categoria: "Accesorios",
         descripcion: "Gorra retro para completar tu look"
       },
       {
@@ -47,7 +47,7 @@ export default function Productos() {
         nombre: "Baggy Jeans",
         precio: 22900,
         imagen: "/assets/producto5.webp",
-        categoria: "pantalones",
+        categoria: "Pantalones",
         descripcion: "Jeans baggy estilo vintage"
       },
       {
@@ -55,7 +55,7 @@ export default function Productos() {
         nombre: "Jeans True Religion",
         precio: 29900,
         imagen: "/assets/producto6.webp",
-        categoria: "pantalones",
+        categoria: "Pantalones",
         descripcion: "Jeans de alta calidad marca True Religion"
       },
       {
@@ -63,7 +63,7 @@ export default function Productos() {
         nombre: "Pantalon RealTree",
         precio: 14900,
         imagen: "/assets/producto7.webp",
-        categoria: "pantalones",
+        categoria: "Pantalones",
         descripcion: "Pantalón camuflaje RealTree"
       }
     ]
@@ -75,10 +75,10 @@ export default function Productos() {
 
   const categorias = [
     { id: 'todas', nombre: 'Todos los Productos', emoji: '👕' },
-    { id: 'remeras', nombre: 'Remeras', emoji: '👚' },
-    { id: 'camperas', nombre: 'Camperas', emoji: '🧥' },
-    { id: 'pantalones', nombre: 'Pantalones', emoji: '👖' },
-    { id: 'accesorios', nombre: 'Accesorios', emoji: '🧢' }
+    { id: 'Poleras', nombre: 'Poleras', emoji: '👚' },
+    { id: 'Poleron', nombre: 'Poleron', emoji: '🧥' },
+    { id: 'Pantalones', nombre: 'Pantalones', emoji: '👖' },
+    { id: 'Accesorios', nombre: 'Accesorios', emoji: '🧢' }
   ]
 
   const productosFiltrados = categoriaFiltro === 'todas' 
@@ -106,19 +106,18 @@ export default function Productos() {
       <h2 className="page-title">👕 Nuestra Colección Y2K</h2>
       <p className="muted mb-4">Descubre las últimas tendencias en ropa estilo años 2000</p>
       
-      {/* Filtros de categoría */}
+      {/* Filtros de categoría - ACTUALIZADO */}
       <div className="mb-4 text-center">
-        <div className="d-flex flex-wrap justify-content-center gap-2">
+        <div className="d-flex flex-wrap justify-content-center">
           {categorias.map(cat => (
-            <Badge
+            <div
               key={cat.id}
-              bg={categoriaFiltro === cat.id ? "primary" : "outline-primary"}
-              className="px-3 py-2 cursor-pointer"
+              className={`categoria-filtro ${categoriaFiltro === cat.id ? 'active' : ''}`}
               onClick={() => setCategoriaFiltro(cat.id)}
-              style={{ cursor: 'pointer', fontSize: '1rem' }}
             >
-              {cat.emoji} {cat.nombre}
-            </Badge>
+              <span className="emoji">{cat.emoji}</span>
+              {cat.nombre}
+            </div>
           ))}
         </div>
       </div>
