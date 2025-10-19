@@ -25,9 +25,9 @@ export default function Home() {
         <Row>
           <Col md={4} className="mb-4">
             <Card className="h-100">
-              <Card.Img variant="top" src="/assets/producto1.webp" alt="Remera Oversize" />
+              <Card.Img variant="top" src="/assets/producto1.webp" alt="Poleron Oversize" />
               <Card.Body className="d-flex flex-column">
-                <Card.Title>Remera Oversize</Card.Title>
+                <Card.Title>Poleron Oversize</Card.Title>
                 <Card.Text className="text-muted">$3.500</Card.Text>
                 <a href="/Productos" className="btn btn-primary mt-auto">Ver producto</a>
               </Card.Body>
@@ -35,9 +35,9 @@ export default function Home() {
           </Col>
           <Col md={4} className="mb-4">
             <Card className="h-100">
-              <Card.Img variant="top" src="/assets/producto2.webp" alt="Campera Y2K" />
+              <Card.Img variant="top" src="/assets/producto2.webp" alt="Poleron Y2K" />
               <Card.Body className="d-flex flex-column">
-                <Card.Title>Campera Y2K</Card.Title>
+                <Card.Title>Poleron Y2K</Card.Title>
                 <Card.Text className="text-muted">$12.000</Card.Text>
                 <a href="/Productos" className="btn btn-primary mt-auto">Ver producto</a>
               </Card.Body>

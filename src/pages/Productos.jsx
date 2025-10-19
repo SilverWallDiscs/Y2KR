@@ -12,15 +12,15 @@ export default function Productos() {
     const productosOriginales = [
       {
         id: 1,
-        nombre: "Remera Oversize",
+        nombre: "Poleron Oversize",
         precio: 3500,
         imagen: "/assets/producto1.webp",
-        categoria: "Poleras",
-        descripcion: "Poleras oversize cómoda y estilo urbano"
+        categoria: "Poleron",
+        descripcion: "Poleron oversize cómoda y estilo urbano"
       },
       {
         id: 2,
-        nombre: "Campera Y2K",
+        nombre: "Poleron Y2K",
         precio: 12000,
         imagen: "/assets/producto2.webp",
         categoria: "Poleron",
@@ -65,7 +65,16 @@ export default function Productos() {
         imagen: "/assets/producto7.webp",
         categoria: "Pantalones",
         descripcion: "Pantalón camuflaje RealTree"
+      },
+      {
+        id: 8,
+        nombre: "Polera Oversize",
+        precio: 8500,
+        imagen: "/assets/producto8.png",
+        categoria: "Poleras",
+        descripcion: "Poleras oversize cómoda y estilo urbano"
       }
+      
     ]
 
     // Cargar productos del administrador desde localStorage
