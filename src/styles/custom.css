@@ -154,6 +154,22 @@ body {
 .hero-section .lead {
   font-size: 1.3rem;
   opacity: 0.9;
+  margin-bottom: 2rem;
+}
+
+.hero-section .btn-light {
+  background: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 30px;
+  font-weight: 600;
+  color: #667eea;
+  transition: all 0.3s ease;
+}
+
+.hero-section .btn-light:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
 }
 
 /* Formularios mejorados */
@@ -401,6 +417,133 @@ body {
   font-weight: 600;
 }
 
+/* ===== ESTILOS PARA EL ADMIN PANEL ===== */
+.admin-stats-card {
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 4px 15px rgba(0,0,0,.08);
+  transition: all 0.3s ease;
+}
+
+.admin-stats-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0,0,0,.12);
+}
+
+.admin-table {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,.08);
+}
+
+.admin-table thead th {
+  background: linear-gradient(135deg, var(--brand-dark) 0%, #2c3e50 100%);
+  color: white;
+  border: none;
+  padding: 15px;
+  font-weight: 600;
+}
+
+.admin-table tbody td {
+  padding: 15px;
+  vertical-align: middle;
+  border-color: #f1f3f4;
+}
+
+/* Botones de acción en tabla */
+.btn-action {
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  border: 2px solid;
+}
+
+.btn-edit {
+  background: white;
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+.btn-edit:hover {
+  background: var(--brand-primary);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.btn-delete {
+  background: white;
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.btn-delete:hover {
+  background: #dc3545;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Modal de admin */
+.admin-modal .modal-content {
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+}
+
+.admin-modal .modal-header {
+  background: linear-gradient(135deg, var(--brand-dark) 0%, #2c3e50 100%);
+  color: white;
+  border-radius: 16px 16px 0 0;
+  border: none;
+}
+
+.admin-modal .modal-footer {
+  border-top: 1px solid #e9ecef;
+  border-radius: 0 0 16px 16px;
+}
+
+/* Tabs del admin */
+.admin-tabs .nav-link {
+  border-radius: 12px 12px 0 0;
+  margin-right: 5px;
+  border: none;
+  font-weight: 600;
+  padding: 12px 20px;
+  transition: all 0.3s ease;
+}
+
+.admin-tabs .nav-link.active {
+  background: linear-gradient(135deg, var(--brand-primary) 0%, #0a58ca 100%);
+  color: white;
+}
+
+.admin-tabs .nav-link:not(.active) {
+  background: #f8f9fa;
+  color: var(--brand-dark);
+}
+
+.admin-tabs .nav-link:not(.active):hover {
+  background: #e9ecef;
+  transform: translateY(-2px);
+}
+
+/* Gráfico de estadísticas */
+.chart-container {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,.08);
+  margin-bottom: 20px;
+}
+
+.chart-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: var(--brand-dark);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .hero-section {
@@ -409,6 +552,10 @@ body {
   
   .hero-section h1 {
     font-size: 2rem;
+  }
+  
+  .hero-section .lead {
+    font-size: 1.1rem;
   }
   
   .card-img-top {
@@ -440,6 +587,16 @@ body {
   .categoria-filtro .emoji {
     font-size: 1.1rem;
     margin-right: 6px;
+  }
+
+  /* Admin responsive */
+  .admin-table {
+    font-size: 0.875rem;
+  }
+  
+  .btn-action {
+    padding: 4px 8px;
+    font-size: 0.8rem;
   }
 }
 

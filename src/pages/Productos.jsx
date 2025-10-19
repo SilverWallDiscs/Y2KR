@@ -7,79 +7,101 @@ export default function Productos() {
   const [productos, setProductos] = useState([])
   const [categoriaFiltro, setCategoriaFiltro] = useState('todas')
 
-  useEffect(() => {
-    // Cargar productos originales
-    const productosOriginales = [
-      {
-        id: 1,
-        nombre: "Poleron Oversize",
-        precio: 3500,
-        imagen: "/assets/producto1.webp",
-        categoria: "Poleron",
-        descripcion: "Poleron oversize cómoda y estilo urbano"
-      },
-      {
-        id: 2,
-        nombre: "Poleron Y2K",
-        precio: 12000,
-        imagen: "/assets/producto2.webp",
-        categoria: "Poleron",
-        descripcion: "Poleron estilo años 2000"
-      },
-      {
-        id: 3,
-        nombre: "Pantalón Cargo",
-        precio: 8700,
-        imagen: "/assets/producto3.webp",
-        categoria: "Pantalones",
-        descripcion: "Pantalón cargo con múltiples bolsillos"
-      },
-      {
-        id: 4,
-        nombre: "Gorra Estilo Retro",
-        precio: 2900,
-        imagen: "/assets/producto4.webp",
-        categoria: "Accesorios",
-        descripcion: "Gorra retro para completar tu look"
-      },
-      {
-        id: 5,
-        nombre: "Baggy Jeans",
-        precio: 22900,
-        imagen: "/assets/producto5.webp",
-        categoria: "Pantalones",
-        descripcion: "Jeans baggy estilo vintage"
-      },
-      {
-        id: 6,
-        nombre: "Jeans True Religion",
-        precio: 29900,
-        imagen: "/assets/producto6.webp",
-        categoria: "Pantalones",
-        descripcion: "Jeans de alta calidad marca True Religion"
-      },
-      {
-        id: 7,
-        nombre: "Pantalon RealTree",
-        precio: 14900,
-        imagen: "/assets/producto7.webp",
-        categoria: "Pantalones",
-        descripcion: "Pantalón camuflaje RealTree"
-      },
-      {
-        id: 8,
-        nombre: "Polera Oversize",
-        precio: 8500,
-        imagen: "/assets/producto8.png",
-        categoria: "Poleras",
-        descripcion: "Poleras oversize cómoda y estilo urbano"
-      }
-      
-    ]
+  const defaultProducts = [
+    {
+      id: 1,
+      nombre: "Polera Oversize",
+      precio: 3500,
+      imagen: "/assets/producto1.webp",
+      categoria: "Poleras",
+      descripcion: "Polera oversize cómoda y estilo urbano",
+      stock: 15
+    },
+    {
+      id: 2,
+      nombre: "Polerón Y2K",
+      precio: 12000,
+      imagen: "/assets/producto2.webp",
+      categoria: "Poleron",
+      descripcion: "Polerón estilo años 2000",
+      stock: 8
+    },
+    {
+      id: 3,
+      nombre: "Pantalón Cargo",
+      precio: 8700,
+      imagen: "/assets/producto3.webp",
+      categoria: "Pantalones",
+      descripcion: "Pantalón cargo con múltiples bolsillos",
+      stock: 12
+    },
+    {
+      id: 4,
+      nombre: "Gorra Estilo Retro",
+      precio: 2900,
+      imagen: "/assets/producto4.webp",
+      categoria: "Accesorios",
+      descripcion: "Gorra retro para completar tu look",
+      stock: 20
+    },
+    {
+      id: 5,
+      nombre: "Baggy Jeans",
+      precio: 22900,
+      imagen: "/assets/producto5.webp",
+      categoria: "Pantalones",
+      descripcion: "Jeans baggy estilo vintage",
+      stock: 6
+    },
+    {
+      id: 6,
+      nombre: "Jeans True Religion",
+      precio: 29900,
+      imagen: "/assets/producto6.webp",
+      categoria: "Pantalones",
+      descripcion: "Jeans de alta calidad marca True Religion",
+      stock: 4
+    },
+    {
+      id: 7,
+      nombre: "Pantalon RealTree",
+      precio: 14900,
+      imagen: "/assets/producto7.webp",
+      categoria: "Pantalones",
+      descripcion: "Pantalón camuflaje RealTree",
+      stock: 10
+    }
+  ]
 
-    // Cargar productos del administrador desde localStorage
-    const productosAdmin = JSON.parse(localStorage.getItem('adminProducts') || '[]')
-    setProductos([...productosOriginales, ...productosAdmin])
+  useEffect(() => {
+    const loadProducts = () => {
+      const productosAdmin = JSON.parse(localStorage.getItem('adminProducts') || '[]')
+      
+      const productosCombinados = [...defaultProducts]
+      
+      productosAdmin.forEach(adminProduct => {
+        const index = productosCombinados.findIndex(p => p.id === adminProduct.id)
+        if (index !== -1) {
+          productosCombinados[index] = adminProduct
+        } else {
+          productosCombinados.push(adminProduct)
+        }
+      })
+      
+      setProductos(productosCombinados)
+    }
+
+    loadProducts()
+    
+    const handleStorageChange = () => {
+      loadProducts()
+    }
+    
+    window.addEventListener('storage', handleStorageChange)
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+    }
   }, [])
 
   const categorias = [
@@ -95,14 +117,25 @@ export default function Productos() {
     : productos.filter(p => p.categoria === categoriaFiltro)
 
   const handleAddToCart = (producto) => {
+    if ((producto.stock || 0) <= 0) {
+      const alertDiv = document.createElement('div')
+      alertDiv.className = 'alert alert-danger position-fixed top-0 start-50 translate-middle-x mt-3'
+      alertDiv.style.zIndex = '9999'
+      alertDiv.innerHTML = `<strong>¡Producto agotado!</strong> No hay stock disponible de ${producto.nombre}`
+      document.body.appendChild(alertDiv)
+      
+      setTimeout(() => {
+        alertDiv.remove()
+      }, 2000)
+      return
+    }
+
     addToCart(producto)
-    // Mostrar notificación bonita
+    
     const alertDiv = document.createElement('div')
     alertDiv.className = 'alert alert-success position-fixed top-0 start-50 translate-middle-x mt-3'
     alertDiv.style.zIndex = '9999'
-    alertDiv.innerHTML = `
-      <strong>¡Agregado al carrito!</strong> ${producto.nombre} 🛒
-    `
+    alertDiv.innerHTML = `<strong>¡Agregado al carrito!</strong> ${producto.nombre} 🛒`
     document.body.appendChild(alertDiv)
     
     setTimeout(() => {
@@ -115,7 +148,6 @@ export default function Productos() {
       <h2 className="page-title">👕 Nuestra Colección Y2K</h2>
       <p className="muted mb-4">Descubre las últimas tendencias en ropa estilo años 2000</p>
       
-      {/* Filtros de categoría - ACTUALIZADO */}
       <div className="mb-4 text-center">
         <div className="d-flex flex-wrap justify-content-center">
           {categorias.map(cat => (
@@ -172,8 +204,8 @@ export default function Productos() {
                       <span className="producto-precio">
                         ${producto.precio.toLocaleString('es-CL')}
                       </span>
-                      <small className="text-muted">
-                        {producto.stock || 'En stock'}
+                      <small className={`fw-bold ${(producto.stock || 0) < 5 ? 'text-danger' : 'text-success'}`}>
+                        Stock: {producto.stock || 0}
                       </small>
                     </div>
                     
@@ -181,8 +213,9 @@ export default function Productos() {
                       variant="primary" 
                       className="w-100"
                       onClick={() => handleAddToCart(producto)}
+                      disabled={(producto.stock || 0) <= 0}
                     >
-                      🛒 Agregar al Carrito
+                      {(producto.stock || 0) <= 0 ? '❌ Agotado' : '🛒 Agregar al Carrito'}
                     </Button>
                   </div>
                 </Card.Body>

@@ -17,14 +17,71 @@ export default function AdminPanel() {
   })
   const [message, setMessage] = useState({ text: '', type: '' })
 
-  useEffect(() => {
-    if (!localStorage.getItem('adminLoggedIn')) {
-      navigate('/admin')
-      return
+  const defaultProducts = [
+    {
+      id: 1,
+      nombre: "Polera Oversize",
+      precio: 3500,
+      imagen: "/assets/producto1.webp",
+      categoria: "Poleras",
+      descripcion: "Polera oversize cómoda y estilo urbano",
+      stock: 15
+    },
+    {
+      id: 2,
+      nombre: "Polerón Y2K",
+      precio: 12000,
+      imagen: "/assets/producto2.webp",
+      categoria: "Poleron",
+      descripcion: "Polerón estilo años 2000",
+      stock: 8
+    },
+    {
+      id: 3,
+      nombre: "Pantalón Cargo",
+      precio: 8700,
+      imagen: "/assets/producto3.webp",
+      categoria: "Pantalones",
+      descripcion: "Pantalón cargo con múltiples bolsillos",
+      stock: 12
+    },
+    {
+      id: 4,
+      nombre: "Gorra Estilo Retro",
+      precio: 2900,
+      imagen: "/assets/producto4.webp",
+      categoria: "Accesorios",
+      descripcion: "Gorra retro para completar tu look",
+      stock: 20
+    },
+    {
+      id: 5,
+      nombre: "Baggy Jeans",
+      precio: 22900,
+      imagen: "/assets/producto5.webp",
+      categoria: "Pantalones",
+      descripcion: "Jeans baggy estilo vintage",
+      stock: 6
+    },
+    {
+      id: 6,
+      nombre: "Jeans True Religion",
+      precio: 29900,
+      imagen: "/assets/producto6.webp",
+      categoria: "Pantalones",
+      descripcion: "Jeans de alta calidad marca True Religion",
+      stock: 4
+    },
+    {
+      id: 7,
+      nombre: "Pantalon RealTree",
+      precio: 14900,
+      imagen: "/assets/producto7.webp",
+      categoria: "Pantalones",
+      descripcion: "Pantalón camuflaje RealTree",
+      stock: 10
     }
-    loadProducts()
-    loadSalesData()
-  }, [navigate])
+  ]
 
   const [stats, setStats] = useState({
     totalProducts: 0,
@@ -34,92 +91,54 @@ export default function AdminPanel() {
     lowStock: 0
   })
 
+  const [salesData, setSalesData] = useState([])
+
+  useEffect(() => {
+    if (!localStorage.getItem('adminLoggedIn')) {
+      navigate('/admin')
+      return
+    }
+    loadProducts()
+    loadSalesData()
+    loadStats()
+  }, [navigate])
+
   const loadProducts = () => {
     const adminProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]')
-    const defaultProducts = [
-      {
-        id: 1,
-        nombre: "Remera Oversize",
-        precio: 3500,
-        imagen: "/assets/producto1.webp",
-        categoria: "remeras",
-        descripcion: "Remera oversize cómoda y estilo urbano",
-        stock: 15
-      },
-      {
-        id: 2,
-        nombre: "Campera Y2K",
-        precio: 12000,
-        imagen: "/assets/producto2.webp",
-        categoria: "camperas",
-        descripcion: "Campera estilo años 2000",
-        stock: 8
-      },
-      {
-        id: 3,
-        nombre: "Pantalón Cargo",
-        precio: 8700,
-        imagen: "/assets/producto3.webp",
-        categoria: "pantalones",
-        descripcion: "Pantalón cargo con múltiples bolsillos",
-        stock: 12
-      },
-      {
-        id: 4,
-        nombre: "Gorra Estilo Retro",
-        precio: 2900,
-        imagen: "/assets/producto4.webp",
-        categoria: "accesorios",
-        descripcion: "Gorra retro para completar tu look",
-        stock: 20
-      },
-      {
-        id: 5,
-        nombre: "Baggy Jeans",
-        precio: 22900,
-        imagen: "/assets/producto5.webp",
-        categoria: "pantalones",
-        descripcion: "Jeans baggy estilo vintage",
-        stock: 6
-      },
-      {
-        id: 6,
-        nombre: "Jeans True Religion",
-        precio: 29900,
-        imagen: "/assets/producto6.webp",
-        categoria: "pantalones",
-        descripcion: "Jeans de alta calidad marca True Religion",
-        stock: 4
-      },
-      {
-        id: 7,
-        nombre: "Pantalon RealTree",
-        precio: 14900,
-        imagen: "/assets/producto7.webp",
-        categoria: "pantalones",
-        descripcion: "Pantalón camuflaje RealTree",
-        stock: 10
-      }
-    ]
     
-    const allProducts = [...defaultProducts, ...adminProducts]
-    setProducts(allProducts)
+    const defaultProductsMap = new Map(defaultProducts.map(p => [p.id, p]))
+    const adminProductsMap = new Map(adminProducts.map(p => [p.id, p]))
+    
+    const combinedProducts = [...defaultProductsMap.values()].map(product => {
+      return adminProductsMap.has(product.id) ? adminProductsMap.get(product.id) : product
+    })
+    
+    adminProducts.forEach(adminProduct => {
+      if (!defaultProductsMap.has(adminProduct.id)) {
+        combinedProducts.push(adminProduct)
+      }
+    })
+    
+    setProducts(combinedProducts)
   }
 
   const loadSalesData = () => {
-    // Datos de ejemplo para estadísticas
-    const salesData = JSON.parse(localStorage.getItem('salesData') || '[]')
-    const totalSales = salesData.reduce((sum, sale) => sum + sale.amount, 0)
-    const revenue = salesData.reduce((sum, sale) => sum + sale.revenue, 0)
+    const savedSalesData = JSON.parse(localStorage.getItem('salesData') || '[]')
+    setSalesData(savedSalesData)
+  }
+
+  const loadStats = () => {
+    const savedSalesData = JSON.parse(localStorage.getItem('salesData') || '[]')
+    const totalSales = savedSalesData.reduce((sum, sale) => sum + sale.amount, 0)
+    const revenue = savedSalesData.reduce((sum, sale) => sum + sale.revenue, 0)
     
-    const allProducts = products.length > 0 ? products : JSON.parse(localStorage.getItem('adminProducts') || '[]')
-    const totalValue = allProducts.reduce((sum, p) => sum + (p.precio * (p.stock || 1)), 0)
-    const lowStock = allProducts.filter(p => (p.stock || 0) < 5).length
+    const totalValue = products.reduce((sum, p) => sum + (p.precio * (p.stock || 1)), 0)
+    const lowStock = products.filter(p => (p.stock || 0) < 5).length
 
     setStats({
-      totalProducts: allProducts.length,
+      totalProducts: products.length,
       totalValue: totalValue,
-      totalSales: salesData.length,
+      totalSales: savedSalesData.length,
       revenue: revenue,
       lowStock: lowStock
     })
@@ -153,24 +172,34 @@ export default function AdminPanel() {
     const adminProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]')
     
     if (editingProduct) {
-      // Editar producto existente
-      const updatedProducts = adminProducts.map(p => 
-        p.id === editingProduct.id ? product : p
-      )
-      localStorage.setItem('adminProducts', JSON.stringify(updatedProducts))
+      const isDefaultProduct = defaultProducts.some(p => p.id === editingProduct.id)
+      
+      if (isDefaultProduct) {
+        const existingIndex = adminProducts.findIndex(p => p.id === editingProduct.id)
+        if (existingIndex >= 0) {
+          adminProducts[existingIndex] = product
+        } else {
+          adminProducts.push(product)
+        }
+      } else {
+        const updatedProducts = adminProducts.map(p => 
+          p.id === editingProduct.id ? product : p
+        )
+        localStorage.setItem('adminProducts', JSON.stringify(updatedProducts))
+      }
       setMessage({ text: 'Producto actualizado correctamente', type: 'success' })
     } else {
-      // Agregar nuevo producto
       adminProducts.push(product)
       localStorage.setItem('adminProducts', JSON.stringify(adminProducts))
       setMessage({ text: 'Producto agregado correctamente', type: 'success' })
     }
 
+    localStorage.setItem('adminProducts', JSON.stringify(adminProducts))
     setNewProduct({ nombre: '', precio: '', imagen: '', categoria: '', descripcion: '', stock: '' })
     setEditingProduct(null)
     setShowModal(false)
     loadProducts()
-    loadSalesData()
+    loadStats()
 
     setTimeout(() => setMessage({ text: '', type: '' }), 3000)
   }
@@ -189,12 +218,23 @@ export default function AdminPanel() {
   }
 
   const handleDeleteProduct = (productId) => {
+    const isDefaultProduct = defaultProducts.some(p => p.id === productId)
+    
+    if (isDefaultProduct) {
+      setMessage({ 
+        text: 'No se pueden eliminar los productos por defecto del sistema', 
+        type: 'warning' 
+      })
+      setTimeout(() => setMessage({ text: '', type: '' }), 3000)
+      return
+    }
+
     if (window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
       const adminProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]')
       const updatedProducts = adminProducts.filter(p => p.id !== productId)
       localStorage.setItem('adminProducts', JSON.stringify(updatedProducts))
       loadProducts()
-      loadSalesData()
+      loadStats()
       setMessage({ text: 'Producto eliminado correctamente', type: 'success' })
       setTimeout(() => setMessage({ text: '', type: '' }), 3000)
     }
@@ -212,13 +252,18 @@ export default function AdminPanel() {
   }
 
   const generateSalesReport = () => {
-    // Generar reporte de ventas simulado
     const report = {
       fecha: new Date().toLocaleDateString(),
       totalProductos: stats.totalProducts,
       valorInventario: stats.totalValue,
       ventasTotales: stats.totalSales,
-      ingresos: stats.revenue
+      ingresos: stats.revenue,
+      productos: products.map(p => ({
+        nombre: p.nombre,
+        precio: p.precio,
+        categoria: p.categoria,
+        stock: p.stock
+      }))
     }
     
     const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' })
@@ -232,11 +277,91 @@ export default function AdminPanel() {
     setTimeout(() => setMessage({ text: '', type: '' }), 3000)
   }
 
+  // Función para renderizar gráfico simple
+  const renderSimpleChart = () => {
+    const categories = ['Poleras', 'Poleron', 'Pantalones', 'Accesorios']
+    const salesByCategory = categories.map(cat => {
+      const categoryProducts = products.filter(p => p.categoria === cat)
+      return categoryProducts.reduce((sum, p) => sum + (p.precio * (p.stock || 0)), 0)
+    })
+
+    const maxValue = Math.max(...salesByCategory)
+    
+    return (
+      <div className="chart-container">
+        <h5 className="chart-title">Valor de Inventario por Categoría</h5>
+        <div className="d-flex flex-column gap-3">
+          {categories.map((category, index) => (
+            <div key={category} className="d-flex align-items-center">
+              <div className="me-3" style={{ width: '100px' }}>
+                <small className="fw-bold">{category}</small>
+              </div>
+              <div className="flex-grow-1">
+                <div 
+                  className="bg-primary rounded-pill text-white text-end px-3"
+                  style={{ 
+                    width: `${(salesByCategory[index] / maxValue) * 100}%`,
+                    height: '25px',
+                    lineHeight: '25px',
+                    minWidth: '40px'
+                  }}
+                >
+                  ${salesByCategory[index].toLocaleString('es-CL')}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  const renderSalesChart = () => {
+    const last7Days = [...Array(7)].map((_, i) => {
+      const date = new Date()
+      date.setDate(date.getDate() - i)
+      return date.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' })
+    }).reverse()
+
+    const salesByDay = last7Days.map(day => {
+      const daySales = salesData.filter(sale => {
+        const saleDate = new Date(sale.date).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' })
+        return saleDate === day
+      })
+      return daySales.reduce((sum, sale) => sum + sale.revenue, 0)
+    })
+
+    const maxSales = Math.max(...salesByDay, 1)
+
+    return (
+      <div className="chart-container">
+        <h5 className="chart-title">Ventas de los Últimos 7 Días</h5>
+        <div className="d-flex align-items-end justify-content-between" style={{ height: '200px' }}>
+          {last7Days.map((day, index) => (
+            <div key={day} className="d-flex flex-column align-items-center" style={{ width: '14%' }}>
+              <div 
+                className="bg-success rounded-top w-100"
+                style={{ 
+                  height: `${(salesByDay[index] / maxSales) * 150}px`,
+                  minHeight: '5px'
+                }}
+              ></div>
+              <small className="mt-2 text-center">
+                <div className="fw-bold">${salesByDay[index].toLocaleString('es-CL')}</div>
+                <div>{day}</div>
+              </small>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <Container className="py-4">
       <Row className="mb-4">
         <Col>
-          <Card>
+          <Card className="admin-stats-card">
             <Card.Header className="d-flex justify-content-between align-items-center">
               <h2 className="mb-0">
                 <i className="fas fa-cog me-2"></i>
@@ -262,7 +387,7 @@ export default function AdminPanel() {
         </Alert>
       )}
 
-      <Tabs defaultActiveKey="stats" className="mb-4">
+      <Tabs defaultActiveKey="stats" className="mb-4 admin-tabs">
         <Tab eventKey="stats" title={
           <span>
             <i className="fas fa-chart-bar me-2"></i>
@@ -271,7 +396,7 @@ export default function AdminPanel() {
         }>
           <Row>
             <Col md={3} className="mb-3">
-              <Card className="text-center border-0 shadow-sm">
+              <Card className="text-center border-0 shadow-sm admin-stats-card">
                 <Card.Body>
                   <div className="text-primary mb-2">
                     <i className="fas fa-tshirt fa-2x"></i>
@@ -283,7 +408,7 @@ export default function AdminPanel() {
             </Col>
             
             <Col md={3} className="mb-3">
-              <Card className="text-center border-0 shadow-sm">
+              <Card className="text-center border-0 shadow-sm admin-stats-card">
                 <Card.Body>
                   <div className="text-success mb-2">
                     <i className="fas fa-dollar-sign fa-2x"></i>
@@ -295,7 +420,7 @@ export default function AdminPanel() {
             </Col>
             
             <Col md={3} className="mb-3">
-              <Card className="text-center border-0 shadow-sm">
+              <Card className="text-center border-0 shadow-sm admin-stats-card">
                 <Card.Body>
                   <div className="text-warning mb-2">
                     <i className="fas fa-shopping-cart fa-2x"></i>
@@ -307,7 +432,7 @@ export default function AdminPanel() {
             </Col>
             
             <Col md={3} className="mb-3">
-              <Card className="text-center border-0 shadow-sm">
+              <Card className="text-center border-0 shadow-sm admin-stats-card">
                 <Card.Body>
                   <div className="text-danger mb-2">
                     <i className="fas fa-exclamation-triangle fa-2x"></i>
@@ -320,13 +445,22 @@ export default function AdminPanel() {
           </Row>
 
           <Row className="mt-4">
+            <Col md={6}>
+              {renderSimpleChart()}
+            </Col>
+            <Col md={6}>
+              {renderSalesChart()}
+            </Col>
+          </Row>
+
+          <Row className="mt-4">
             <Col>
-              <Card>
+              <Card className="admin-stats-card">
                 <Card.Header className="d-flex justify-content-between align-items-center">
                   <h5 className="mb-0">Resumen de Ventas</h5>
                   <Button variant="outline-primary" size="sm" onClick={generateSalesReport}>
                     <i className="fas fa-download me-2"></i>
-                    Logor Reporte
+                    Descargar Reporte
                   </Button>
                 </Card.Header>
                 <Card.Body>
@@ -363,7 +497,7 @@ export default function AdminPanel() {
         }>
           <Row className="mb-4">
             <Col>
-              <Card>
+              <Card className="admin-stats-card">
                 <Card.Header className="d-flex justify-content-between align-items-center">
                   <h5 className="mb-0">Lista de Productos</h5>
                   <Button variant="primary" onClick={() => setShowModal(true)}>
@@ -376,7 +510,7 @@ export default function AdminPanel() {
                     <p className="text-muted text-center py-4">No hay productos en la tienda</p>
                   ) : (
                     <div className="table-responsive">
-                      <Table hover>
+                      <Table hover className="admin-table">
                         <thead>
                           <tr>
                             <th>Imagen</th>
@@ -388,52 +522,65 @@ export default function AdminPanel() {
                           </tr>
                         </thead>
                         <tbody>
-                          {products.map(product => (
-                            <tr key={product.id}>
-                              <td>
-                                <img 
-                                  src={product.imagen} 
-                                  alt={product.nombre}
-                                  style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                                  onError={(e) => {
-                                    e.target.src = 'https://via.placeholder.com/50x50?text=Imagen'
-                                  }}
-                                />
-                              </td>
-                              <td>
-                                <strong>{product.nombre}</strong>
-                                {product.descripcion && (
-                                  <small className="text-muted">{product.descripcion}</small>
-                                )}
-                              </td>
-                              <td>${product.precio.toLocaleString('es-CL')}</td>
-                              <td>
-                                <Badge bg="primary">{product.categoria}</Badge>
-                              </td>
-                              <td>
-                                <Badge bg={(product.stock || 0) < 5 ? "danger" : "success"}>
-                                  {product.stock || 0}
-                                </Badge>
-                              </td>
-                              <td>
-                                <Button
-                                  variant="outline-primary"
-                                  size="sm"
-                                  className="me-2"
-                                  onClick={() => handleEditProduct(product)}
-                                >
-                                  <i className="fas fa-edit"></i>
-                                </Button>
-                                <Button
-                                  variant="outline-danger"
-                                  size="sm"
-                                  onClick={() => handleDeleteProduct(product.id)}
-                                >
-                                  <i className="fas fa-trash"></i>
-                                </Button>
-                              </td>
-                            </tr>
-                          ))}
+                          {products.map(product => {
+                            const isDefaultProduct = defaultProducts.some(p => p.id === product.id)
+                            return (
+                              <tr key={product.id}>
+                                <td>
+                                  <img 
+                                    src={product.imagen} 
+                                    alt={product.nombre}
+                                    style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '8px' }}
+                                    onError={(e) => {
+                                      e.target.src = 'https://via.placeholder.com/50x50?text=Imagen'
+                                    }}
+                                  />
+                                </td>
+                                <td>
+                                  <strong>{product.nombre}</strong>
+                                  {isDefaultProduct && (
+                                    <Badge bg="secondary" className="ms-2" style={{ fontSize: '0.6rem' }}>
+                                      Default
+                                    </Badge>
+                                  )}
+                                  {product.descripcion && (
+                                    <div>
+                                      <small className="text-muted d-block mt-1">{product.descripcion}</small>
+                                    </div>
+                                  )}
+                                </td>
+                                <td>${product.precio.toLocaleString('es-CL')}</td>
+                                <td>
+                                  <Badge bg="primary">{product.categoria}</Badge>
+                                </td>
+                                <td>
+                                  <Badge bg={(product.stock || 0) < 5 ? "danger" : "success"}>
+                                    {product.stock || 0}
+                                  </Badge>
+                                </td>
+                                <td>
+                                  <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    className="me-2 btn-action btn-edit"
+                                    onClick={() => handleEditProduct(product)}
+                                  >
+                                    <i className="fas fa-edit"></i>
+                                  </Button>
+                                  {!isDefaultProduct && (
+                                    <Button
+                                      variant="outline-danger"
+                                      size="sm"
+                                      className="btn-action btn-delete"
+                                      onClick={() => handleDeleteProduct(product.id)}
+                                    >
+                                      <i className="fas fa-trash"></i>
+                                    </Button>
+                                  )}
+                                </td>
+                              </tr>
+                            )
+                          })}
                         </tbody>
                       </Table>
                     </div>
@@ -446,7 +593,7 @@ export default function AdminPanel() {
       </Tabs>
 
       {/* Modal para agregar/editar producto */}
-      <Modal show={showModal} onHide={handleCloseModal} size="lg">
+      <Modal show={showModal} onHide={handleCloseModal} size="lg" className="admin-modal">
         <Modal.Header closeButton>
           <Modal.Title>
             <i className="fas fa-box me-2"></i>
@@ -465,7 +612,7 @@ export default function AdminPanel() {
                     value={newProduct.nombre}
                     onChange={handleInputChange}
                     required
-                    placeholder="Ej: Remera Oversize Negra"
+                    placeholder="Ej: Polera Oversize Negra"
                   />
                 </Form.Group>
               </Col>
@@ -509,10 +656,10 @@ export default function AdminPanel() {
                     required
                   >
                     <option value="">Seleccionar categoría</option>
-                    <option value="remeras">👚 Remeras</option>
-                    <option value="camperas">🧥 Camperas</option>
-                    <option value="pantalones">👖 Pantalones</option>
-                    <option value="accesorios">🧢 Accesorios</option>
+                    <option value="Poleras">👚 Poleras</option>
+                    <option value="Poleron">🧥 Poleron</option>
+                    <option value="Pantalones">👖 Pantalones</option>
+                    <option value="Accesorios">🧢 Accesorios</option>
                   </Form.Select>
                 </Form.Group>
               </Col>
