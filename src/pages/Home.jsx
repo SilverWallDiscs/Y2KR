@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Container, Row, Col, Card } from 'react-bootstrap'
+import Carousel from 'react-bootstrap/Carousel';
+
+
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([])
@@ -68,13 +71,50 @@ export default function Home() {
       </Row>
       
       {/* Hero Section */}
-      <section className="hero-section mb-5">
-        <div className="hero-content text-center text-white py-5">
-          <h1>Descubre la nueva colección</h1>
-          <p className="lead">Estilo, calidad y comodidad para cada momento.</p>
-          <a href="/Productos" className="btn btn-light btn-lg">Comprar ahora</a>
-        </div>
-      </section>
+    <Carousel className="mb-5">
+      <Carousel.Item>
+        <img
+          className="d-block w-100"
+          src="/assets/Fondo1.webp"
+          alt="Primera diapositiva"
+          style={{ maxHeight: '500px', objectFit: 'cover' }}
+          onError={(e) => { e.target.src = 'https://via.placeholder.com/800x500?text=Imagen+no+disponible' }}
+        />
+        <Carousel.Caption>
+          <h3>Primera Colección</h3>
+          <p>Descubre nuestra línea urbana Y2K con estilo y actitud.</p>
+        </Carousel.Caption>
+      </Carousel.Item>
+      
+      <Carousel.Item>
+        <img
+          className="d-block w-100"
+          src="/assets/Fondo5.jpg "
+          alt="Segunda diapositiva"
+          style={{ maxHeight: '500px', objectFit: 'cover' }}
+          onError={(e) => { e.target.src = 'https://via.placeholder.com/800x500?text=Imagen+no+disponible' }}
+        />
+        <Carousel.Caption>
+          <h3>Nueva Temporada</h3>
+          <p>Looks frescos, cómodos y con mucha onda.</p>
+        </Carousel.Caption>
+      </Carousel.Item>
+
+      <Carousel.Item>
+        <img
+          className="d-block w-100"
+          src="/assets/Fondo2.jpg"
+          alt="Tercera diapositiva"
+          style={{ maxHeight: '500px', objectFit: 'cover' }}
+          onError={(e) => { e.target.src = 'https://via.placeholder.com/800x500?text=Imagen+no+disponible' }}
+        />
+        <Carousel.Caption>
+          <h3>¡Exprésate!</h3>
+          <p>Moda que refleja tu personalidad.</p>
+        </Carousel.Caption>
+      </Carousel.Item>
+    </Carousel>
+
       
       {/* Productos Destacados */}
       <section className="productos-destacados mb-5">
@@ -87,7 +127,7 @@ export default function Home() {
                   variant="top" 
                   src={producto.imagen} 
                   alt={producto.nombre}
-                  style={{ height: '250px', objectFit: 'cover' }}
+                  style={{ height: '500px', objectFit: 'cover' }}
                   onError={(e) => {
                     e.target.src = 'https://via.placeholder.com/300x250?text=Imagen+no+disponible'
                   }}

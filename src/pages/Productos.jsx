@@ -178,7 +178,7 @@ export default function Productos() {
                     variant="top" 
                     src={producto.imagen} 
                     alt={producto.nombre}
-                    style={{ height: '300px', objectFit: 'cover' }}
+                    style={{ height: '500px', objectFit: 'cover' }}
                     onError={(e) => {
                       e.target.src = 'https://via.placeholder.com/300x400?text=Imagen+no+disponible'
                     }}

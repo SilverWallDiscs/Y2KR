@@ -565,16 +565,20 @@ export default function AdminPanel() {
                                     className="me-2 btn-action btn-edit"
                                     onClick={() => handleEditProduct(product)}
                                   >
-                                    <i className="fas fa-edit"></i>
+                                    <i className="fas fa-edit">
+                                      <img src="public\assets\edit.jpg" width="20" alt="" />
+                                    </i>
                                   </Button>
                                   {!isDefaultProduct && (
                                     <Button
                                       variant="outline-danger"
-                                      size="sm"
+                                      size="sm" 
                                       className="btn-action btn-delete"
                                       onClick={() => handleDeleteProduct(product.id)}
                                     >
-                                      <i className="fas fa-trash"></i>
+                                      <i className="fas fa-trash">
+                                        <img src="public\assets\trash.png" width="20" alt="" />
+                                      </i>
                                     </Button>
                                   )}
                                 </td>

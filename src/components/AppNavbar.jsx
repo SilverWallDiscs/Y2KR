@@ -54,9 +54,10 @@ export default function GradientAppNavbar() {
           <Nav className="align-items-center">
             <LinkContainer to="/carrito">
               <Nav.Link className="position-relative mx-3">
-                <Button variant="outline-light" className="position-relative">
-                  <i className="bi bi-cart3 me-2"></i>
-                  Carrito
+                <Button variant="outline-dark" className="position-relative">
+                  
+                  <img src="/assets/carrito.png" width={25} alt="" />
+
                   {carrito.length > 0 && (
                     <Badge 
                       bg="warning" 
@@ -66,6 +67,7 @@ export default function GradientAppNavbar() {
                       {totalItems}
                     </Badge>
                   )}
+                  
                 </Button>
               </Nav.Link>
             </LinkContainer>
@@ -91,7 +93,7 @@ export default function GradientAppNavbar() {
                     Iniciar Sesión
                   </Button>
                 </LinkContainer>
-                <LinkContainer to="/registro">
+                <LinkContainer to="/register">
                   <Button variant="warning" className="text-dark">
                     Registrarse
                   </Button>
