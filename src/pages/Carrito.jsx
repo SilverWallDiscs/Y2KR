@@ -1,27 +1,83 @@
 import React from 'react'
 import { Container, Row, Col, Card, Button, Alert, Badge } from 'react-bootstrap'
 import { useAuth } from '../auth/AuthContext'
-import { updateProductStock } from './AdminPanel'
 
 export default function Carrito() {
   const { carrito, removeFromCart, clearCart, updateCartItemQuantity } = useAuth()
 
+  // Calcular total
   const calcularTotal = () => {
     return carrito.reduce((total, item) => total + (item.precio * (item.cantidad || 1)), 0)
   }
 
+  // 🔹 Reducir stock en localStorage cuando se finaliza la compra
+  const actualizarStock = () => {
+    const adminProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]')
+    const defaultProducts = JSON.parse(localStorage.getItem('defaultProductsBackup') || '[]') // respaldo
+
+    const allProducts = mergeDefaultAndAdmin(defaultProducts, adminProducts)
+
+    const productosActualizados = allProducts.map(producto => {
+      const itemComprado = carrito.find(c => c.id === producto.id)
+      if (itemComprado) {
+        const nuevoStock = (producto.stock || 0) - (itemComprado.cantidad || 1)
+        return { ...producto, stock: Math.max(nuevoStock, 0) } // nunca stock negativo
+      }
+      return producto
+    })
+
+    // separar productos por defecto y personalizados antes de guardar
+    const nuevosDefault = productosActualizados.filter(p => defaultProducts.some(dp => dp.id === p.id))
+    const nuevosAdmin = productosActualizados.filter(p => !defaultProducts.some(dp => dp.id === p.id))
+
+    // Guardar los cambios en localStorage
+    localStorage.setItem('adminProducts', JSON.stringify(nuevosAdmin))
+
+    // Guardar respaldo de los productos por defecto (solo si existe)
+    if (defaultProducts.length > 0) {
+      localStorage.setItem('defaultProductsBackup', JSON.stringify(nuevosDefault))
+    }
+  }
+
+  // 🔹 Combina productos por defecto y personalizados
+  const mergeDefaultAndAdmin = (defaultProducts, adminProducts) => {
+    const defaultMap = new Map(defaultProducts.map(p => [p.id, p]))
+    const adminMap = new Map(adminProducts.map(p => [p.id, p]))
+
+    const merged = [...defaultMap.values()].map(p =>
+      adminMap.has(p.id) ? adminMap.get(p.id) : p
+    )
+
+    adminProducts.forEach(p => {
+      if (!defaultMap.has(p.id)) merged.push(p)
+    })
+
+    return merged
+  }
+
+  // Manejar checkout
   const handleCheckout = () => {
     if (carrito.length === 0) return
-    
+
+    // Actualiza el stock
+    actualizarStock()
+
     alert('¡Compra realizada con éxito! Gracias por tu compra en KorteY2K.')
     clearCart()
   }
 
-  
-
   const aumentarCantidad = (index) => {
     const item = carrito[index]
-    updateCartItemQuantity(index, (item.cantidad || 1) + 1)
+    const adminProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]')
+    const defaultProducts = JSON.parse(localStorage.getItem('defaultProductsBackup') || '[]')
+    const allProducts = mergeDefaultAndAdmin(defaultProducts, adminProducts)
+    const productoReal = allProducts.find(p => p.id === item.id)
+
+    if (productoReal && (item.cantidad || 1) < productoReal.stock) {
+      updateCartItemQuantity(index, (item.cantidad || 1) + 1)
+    } else {
+      alert('⚠️ No hay más stock disponible para este producto.')
+    }
   }
 
   const disminuirCantidad = (index) => {
@@ -34,7 +90,7 @@ export default function Carrito() {
   return (
     <Container>
       <h2 className="page-title">🛒 Mi Carrito de Compras</h2>
-      
+
       {carrito.length === 0 ? (
         <Alert variant="info" className="text-center py-5">
           <div className="py-4">
@@ -59,8 +115,8 @@ export default function Carrito() {
                   <div key={`${item.id}-${index}`} className="carrito-item">
                     <Row className="align-items-center">
                       <Col md={3}>
-                        <img 
-                          src={item.imagen} 
+                        <img
+                          src={item.imagen}
                           alt={item.nombre}
                           className="rounded-3 w-100"
                           style={{ height: '120px', objectFit: 'cover' }}
@@ -69,14 +125,14 @@ export default function Carrito() {
                           }}
                         />
                       </Col>
-                      
+
                       <Col md={4}>
                         <h6 className="producto-nombre mb-2">{item.nombre}</h6>
                         <Badge bg="secondary" className="badge-categoria">
                           {item.categoria}
                         </Badge>
                       </Col>
-                      
+
                       <Col md={2}>
                         <div className="text-center">
                           <h6 className="producto-precio mb-0">
@@ -85,11 +141,11 @@ export default function Carrito() {
                           <small className="text-muted">c/u</small>
                         </div>
                       </Col>
-                      
+
                       <Col md={2}>
                         <div className="cantidad-controls justify-content-center">
-                          <Button 
-                            variant="outline-secondary" 
+                          <Button
+                            variant="outline-secondary"
                             size="sm"
                             onClick={() => disminuirCantidad(index)}
                             disabled={(item.cantidad || 1) <= 1}
@@ -97,8 +153,8 @@ export default function Carrito() {
                             -
                           </Button>
                           <span className="mx-3 fw-bold">{item.cantidad || 1}</span>
-                          <Button 
-                            variant="outline-secondary" 
+                          <Button
+                            variant="outline-secondary"
                             size="sm"
                             onClick={() => aumentarCantidad(index)}
                           >
@@ -106,7 +162,7 @@ export default function Carrito() {
                           </Button>
                         </div>
                       </Col>
-                      
+
                       <Col md={1}>
                         <Button
                           variant="outline-danger"
@@ -122,7 +178,7 @@ export default function Carrito() {
                 ))}
               </Card.Body>
             </Card>
-            
+
             <div className="d-flex gap-3">
               <Button variant="outline-secondary" onClick={clearCart}>
                 Vaciar Carrito
@@ -132,40 +188,40 @@ export default function Carrito() {
               </Button>
             </div>
           </Col>
-          
+
           <Col lg={4}>
             <Card className="carrito-total">
               <Card.Body>
                 <h5 className="mb-4 text-center">Resumen de Compra</h5>
-                
+
                 <div className="d-flex justify-content-between mb-3">
                   <span>Subtotal:</span>
                   <span>${calcularTotal().toLocaleString('es-CL')}</span>
                 </div>
-                
+
                 <div className="d-flex justify-content-between mb-3">
                   <span>Envío:</span>
                   <span className="text-success">Gratis</span>
                 </div>
-                
+
                 <hr className="my-3" />
-                
+
                 <div className="d-flex justify-content-between mb-4">
                   <strong>Total:</strong>
                   <strong className="fs-4">
                     ${calcularTotal().toLocaleString('es-CL')}
                   </strong>
                 </div>
-                
-                <Button 
-                  variant="light" 
-                  size="lg" 
+
+                <Button
+                  variant="light"
+                  size="lg"
                   className="w-100 fw-bold"
                   onClick={handleCheckout}
                 >
                   Finalizar Compra
                 </Button>
-                
+
                 <div className="text-center mt-3">
                   <small className="opacity-75">
                     ✅ Envío gratis en compras sobre $20.000

@@ -684,38 +684,22 @@ export default function AdminPanel() {
               )}
             </Form.Group>
 
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Categoría *</Form.Label>
-                  <Form.Select
-                    name="categoria"
-                    value={newProduct.categoria}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Seleccionar categoría</option>
-                    <option value="Poleras">👚 Poleras</option>
-                    <option value="Poleron">🧥 Poleron</option>
-                    <option value="Pantalones">👖 Pantalones</option>
-                    <option value="Accesorios">🧢 Accesorios</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Stock</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="stock"
-                    value={newProduct.stock}
-                    onChange={handleInputChange}
-                    min="0"
-                    placeholder="Cantidad en stock"
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
+          <Form.Group className="mb-3">
+            <Form.Label>Categoría *</Form.Label>
+            <Form.Select
+              name="categoria"
+              value={newProduct.categoria}
+              onChange={handleInputChange}
+              required
+            >
+              <option value="">Seleccionar categoría</option>
+              <option value="Poleras">👚 Poleras</option>
+              <option value="Poleron">🧥 Poleron</option>
+              <option value="Pantalones">👖 Pantalones</option>
+              <option value="Accesorios">🧢 Accesorios</option>
+            </Form.Select>
+          </Form.Group>
+
 
             <Form.Group className="mb-3">
               <Form.Label>Descripción</Form.Label>
