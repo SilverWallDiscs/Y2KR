@@ -1,6 +1,7 @@
 import React from 'react'
 import { Container, Row, Col, Card, Button, Alert, Badge } from 'react-bootstrap'
 import { useAuth } from '../auth/AuthContext'
+import { updateProductStock } from './AdminPanel'
 
 export default function Carrito() {
   const { carrito, removeFromCart, clearCart, updateCartItemQuantity } = useAuth()
@@ -15,6 +16,8 @@ export default function Carrito() {
     alert('¡Compra realizada con éxito! Gracias por tu compra en KorteY2K.')
     clearCart()
   }
+
+  
 
   const aumentarCantidad = (index) => {
     const item = carrito[index]

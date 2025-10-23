@@ -16,6 +16,7 @@ export default function AdminPanel() {
     stock: ''
   })
   const [message, setMessage] = useState({ text: '', type: '' })
+  const [imagePreview, setImagePreview] = useState('') // Para la preview de la imagen
 
   const defaultProducts = [
     {
@@ -151,10 +152,37 @@ export default function AdminPanel() {
     })
   }
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp']
+      if (!validTypes.includes(file.type)) {
+        setMessage({ text: 'Solo se permiten imágenes PNG, JPG o WEBP', type: 'danger' })
+        setTimeout(() => setMessage({ text: '', type: '' }), 3000)
+        return
+      }
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        setNewProduct({
+          ...newProduct,
+          imagen: event.target.result // Almacena la data URL
+        })
+        setImagePreview(event.target.result) // Para la preview
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   const handleAddProduct = (e) => {
     e.preventDefault()
     
-    if (!newProduct.nombre || !newProduct.precio || !newProduct.imagen || !newProduct.categoria) {
+    const precio = parseFloat(newProduct.precio)
+    if (precio < 10000 || precio > 500000 || precio % 10 !== 0) {
+      setMessage({ text: 'El precio debe estar entre 10,000 y 500,000, y ser múltiplo de 10', type: 'danger' })
+      return
+    }
+
+    if (!newProduct.nombre || !newProduct.imagen || !newProduct.categoria) {
       setMessage({ text: 'Por favor completa todos los campos obligatorios', type: 'danger' })
       return
     }
@@ -162,7 +190,7 @@ export default function AdminPanel() {
     const product = {
       id: editingProduct ? editingProduct.id : Date.now(),
       nombre: newProduct.nombre,
-      precio: parseFloat(newProduct.precio),
+      precio: precio,
       imagen: newProduct.imagen,
       categoria: newProduct.categoria,
       descripcion: newProduct.descripcion,
@@ -196,6 +224,7 @@ export default function AdminPanel() {
 
     localStorage.setItem('adminProducts', JSON.stringify(adminProducts))
     setNewProduct({ nombre: '', precio: '', imagen: '', categoria: '', descripcion: '', stock: '' })
+    setImagePreview('')
     setEditingProduct(null)
     setShowModal(false)
     loadProducts()
@@ -214,6 +243,7 @@ export default function AdminPanel() {
       descripcion: product.descripcion || '',
       stock: product.stock || ''
     })
+    setImagePreview(product.imagen) // Mostrar preview al editar
     setShowModal(true)
   }
 
@@ -244,6 +274,7 @@ export default function AdminPanel() {
     setShowModal(false)
     setEditingProduct(null)
     setNewProduct({ nombre: '', precio: '', imagen: '', categoria: '', descripcion: '', stock: '' })
+    setImagePreview('')
   }
 
   const handleLogout = () => {
@@ -466,7 +497,7 @@ export default function AdminPanel() {
                 <Card.Body>
                   <Row>
                     <Col md={6}>
-                      <h6>Ingresos Totales</h6>
+                                            <h6>Ingresos Totales</h6>
                       <h3 className="text-success">${stats.revenue.toLocaleString('es-CL')}</h3>
                     </Col>
                     <Col md={6}>
@@ -628,25 +659,29 @@ export default function AdminPanel() {
                     name="precio"
                     value={newProduct.precio}
                     onChange={handleInputChange}
-                    min="0"
-                    step="0.01"
+                    min="10000"
+                    max="500000"
+                    step="10"
                     required
-                    placeholder="Ej: 3500"
+                    placeholder="Ej: 10000"
                   />
                 </Form.Group>
               </Col>
             </Row>
 
             <Form.Group className="mb-3">
-              <Form.Label>URL de la Imagen *</Form.Label>
+              <Form.Label>Seleccionar Imagen *</Form.Label>
               <Form.Control
-                type="text"
-                name="imagen"
-                value={newProduct.imagen}
-                onChange={handleInputChange}
-                placeholder="https://ejemplo.com/imagen.jpg"
-                required
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                onChange={handleImageChange}
+                required={!editingProduct}
               />
+              {imagePreview && (
+                <div className="mt-3">
+                  <img src={imagePreview} alt="Preview" style={{ width: '100px', height: '200px', objectFit: 'cover', border: '1px solid #ccc', borderRadius: '8px' }} />
+                </div>
+              )}
             </Form.Group>
 
             <Row>
