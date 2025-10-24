@@ -51,7 +51,7 @@ export default function App() {
     const clearCart = () => setCarrito([])
 
     const handleCheckout = () => {
-        alert('¡Compra realizada con éxito! Gracias por tu compra.')
+        alert('compra realizada con exito gracias por tu compra en kortey2k')
         clearCart()
     }
 
