@@ -11,7 +11,7 @@
    ```
 
 2. **Instala las dependencias**:
-   - Para Node.js:
+    Con Node.js:
      ```bash
      npm install
      ```
