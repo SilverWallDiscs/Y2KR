@@ -712,6 +712,18 @@ export default function AdminPanel() {
                 placeholder="Describe el producto..."
               />
             </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Stock</Form.Label>
+                <Form.Control
+                  type="number"
+                  name="stock"
+                  value={newProduct.stock}
+                  onChange={handleInputChange}
+                  min="0"
+                  required
+                  placeholder="Ej: 10"
+                />
+              </Form.Group>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleCloseModal}>
