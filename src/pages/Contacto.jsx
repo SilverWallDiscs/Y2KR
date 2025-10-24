@@ -2,52 +2,52 @@ import React, { useState } from 'react'
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap'
 
 export default function Contacto() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState({ 
     nombre: '',
     email: '',
     asunto: '',
     mensaje: ''
   })
-  const [message, setMessage] = useState({ text: '', type: '' })
+  const [message, setMessage] = useState({ text: '', type: '' }) // estado para mensaje de exito o error
 
-  const handleChange = (e) => {
+  const handleChange = (e) => { // funcion para manejar cambios en los inputs
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value // actualizo campo segun nombre
     })
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    
-    if (!formData.nombre || !formData.email || !formData.asunto || !formData.mensaje) {
-      setMessage({ text: 'Por favor, completa todos los campos', type: 'error' })
+  const handleSubmit = (e) => { // funcion para enviar formulario
+    e.preventDefault() // evito recargar pagina
+
+    if (!formData.nombre || !formData.email || !formData.asunto || !formData.mensaje) { // verifico campos vacios
+      setMessage({ text: 'por favor completa todos los campos', type: 'error' }) // mensaje error
       return
     }
 
-    if (!isValidEmail(formData.email)) {
-      setMessage({ text: 'Por favor, ingresa un email válido', type: 'error' })
+    if (!isValidEmail(formData.email)) { // valido formato email
+      setMessage({ text: 'por favor ingresa un email valido', type: 'error' }) // mensaje error email
       return
     }
 
-    setMessage({ text: 'Enviando mensaje...', type: 'success' })
+    setMessage({ text: 'enviando mensaje...', type: 'success' }) // mensaje envio
 
-    setTimeout(() => {
-      setMessage({ text: '¡Mensaje enviado con éxito! Te contactaremos pronto.', type: 'success' })
-      setFormData({ nombre: '', email: '', asunto: '', mensaje: '' })
+    setTimeout(() => { // simulo envio
+      setMessage({ text: 'mensaje enviado con exito te contactaremos pronto', type: 'success' }) // mensaje exito
+      setFormData({ nombre: '', email: '', asunto: '', mensaje: '' }) // limpio formulario
     }, 2000)
   }
 
-  const isValidEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const isValidEmail = (email) => { // funcion para validar email con regex
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/ 
     return re.test(email)
   }
 
   return (
     <Container className="main-contacto">
       <div className="contacto-header text-center mb-5">
-        <h1>Contáctanos</h1>
-        <p className="lead">¿Tienes alguna pregunta, comentario o inquietud? Nos encantaría escucharte.</p>
+        <h1>contáctanos</h1> 
+        <p className="lead">tienes alguna pregunta comentario o inquietud nos encantaria escucharte</p>
       </div>
 
       <Row>
@@ -56,20 +56,20 @@ export default function Contacto() {
             <Card.Body>
               <Card.Title className="mb-4">
                 <i className="fas fa-envelope me-2"></i>
-                Envíanos un mensaje
+                enviamos un mensaje
               </Card.Title>
               <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-3">
-                  <Form.Label>
+                <Form.Group className="mb-3"> 
+                  <Form.Label> 
                     <i className="fas fa-user me-2"></i>
-                    Nombre completo
+                    nombre completo
                   </Form.Label>
                   <Form.Control
                     type="text"
                     name="nombre"
-                    value={formData.nombre}
-                    onChange={handleChange}
-                    placeholder="Tu nombre completo"
+                    value={formData.nombre} // valor input nombre
+                    onChange={handleChange} // onchange
+                    placeholder="tu nombre completo"
                     required
                   />
                 </Form.Group>
@@ -77,13 +77,13 @@ export default function Contacto() {
                 <Form.Group className="mb-3">
                   <Form.Label>
                     <i className="fas fa-envelope me-2"></i>
-                    Correo electrónico
+                    correo electronico
                   </Form.Label>
                   <Form.Control
                     type="email"
                     name="email"
-                    value={formData.email}
-                    onChange={handleChange}
+                    value={formData.email} // valor input email
+                    onChange={handleChange} // onchange
                     placeholder="tu@email.com"
                     required
                   />
@@ -92,14 +92,14 @@ export default function Contacto() {
                 <Form.Group className="mb-3">
                   <Form.Label>
                     <i className="fas fa-tag me-2"></i>
-                    Asunto
+                    asunto
                   </Form.Label>
                   <Form.Control
                     type="text"
                     name="asunto"
-                    value={formData.asunto}
-                    onChange={handleChange}
-                    placeholder="Asunto de tu mensaje"
+                    value={formData.asunto} // valor input asunto
+                    onChange={handleChange} // onchange
+                    placeholder="asunto de tu mensaje"
                     required
                   />
                 </Form.Group>
@@ -107,25 +107,25 @@ export default function Contacto() {
                 <Form.Group className="mb-4">
                   <Form.Label>
                     <i className="fas fa-comment me-2"></i>
-                    Mensaje
+                    mensaje
                   </Form.Label>
                   <Form.Control
                     as="textarea"
                     rows={5}
                     name="mensaje"
-                    value={formData.mensaje}
-                    onChange={handleChange}
-                    placeholder="Escribe tu mensaje aquí..."
+                    value={formData.mensaje} // valor text mensaje
+                    onChange={handleChange} // onchange
+                    placeholder="escribe tu mensaje aqui"
                     required
                   />
                 </Form.Group>
 
                 <Button type="submit" className="btn-enviar w-100">
                   <i className="fas fa-paper-plane me-2"></i>
-                  Enviar mensaje
+                  enviar mensaje
                 </Button>
 
-                {message.text && (
+                {message.text && ( // muestro mensaje si existe
                   <Alert variant={message.type === 'success' ? 'success' : 'danger'} className="mt-3">
                     {message.text}
                   </Alert>
@@ -140,7 +140,7 @@ export default function Contacto() {
             <Card.Body>
               <Card.Title className="mb-4">
                 <i className="fas fa-info-circle me-2"></i>
-                Información de contacto
+                informacion de contacto
               </Card.Title>
 
               <div className="contacto-item mb-3">
@@ -148,8 +148,8 @@ export default function Contacto() {
                   <i className="fas fa-map-marker-alt"></i>
                 </div>
                 <div>
-                  <h5>Dirección</h5>
-                  <p className="mb-0">Álvarez 2336, 2571188 Viña del Mar, Valparaíso</p>
+                  <h5>direccion</h5>
+                  <p className="mb-0">alvarez 2336 2571188 vina del mar valparaiso</p>
                 </div>
               </div>
 
@@ -158,7 +158,7 @@ export default function Contacto() {
                   <i className="fas fa-envelope"></i>
                 </div>
                 <div>
-                  <h5>Email</h5>
+                  <h5>email</h5>
                   <a href="mailto:soporte@kortey2k.com" className="text-white">soporte@kortey2k.com</a>
                 </div>
               </div>
@@ -168,7 +168,7 @@ export default function Contacto() {
                   <i className="fas fa-phone"></i>
                 </div>
                 <div>
-                  <h5>Teléfono</h5>
+                  <h5>telefono</h5>
                   <a href="tel:+541123456789" className="text-white">+54 11 2345 6789</a>
                 </div>
               </div>
@@ -178,27 +178,27 @@ export default function Contacto() {
                   <i className="fas fa-clock"></i>
                 </div>
                 <div>
-                  <h5>Horario de atención</h5>
+                  <h5>horario de atencion</h5>
                   <p className="mb-0">
-                    Lunes a Viernes: 9:00 - 18:00<br />
-                    Sábados: 10:00 - 14:00
+                    lunes a viernes 9 00 - 18 00
+                    sabados 10 00 - 14 00
                   </p>
                 </div>
               </div>
 
               <div className="redes-sociales">
-                <h5 className="mb-3">Síguenos en redes sociales</h5>
+                <h5 className="mb-3">siguenos en redes sociales</h5>
                 <div className="social-icons d-flex gap-3">
-                  <a href="#" className="text-white" aria-label="Instagram">
+                  <a href="#" className="text-white" aria-label="instagram">
                     <i className="fab fa-instagram fa-lg"></i>
                   </a>
-                  <a href="#" className="text-white" aria-label="Facebook">
+                  <a href="#" className="text-white" aria-label="facebook">
                     <i className="fab fa-facebook-f fa-lg"></i>
                   </a>
-                  <a href="#" className="text-white" aria-label="Twitter">
+                  <a href="#" className="text-white" aria-label="twitter">
                     <i className="fab fa-twitter fa-lg"></i>
                   </a>
-                  <a href="#" className="text-white" aria-label="TikTok">
+                  <a href="#" className="text-white" aria-label="tiktok">
                     <i className="fab fa-tiktok fa-lg"></i>
                   </a>
                 </div>
@@ -212,7 +212,7 @@ export default function Contacto() {
         <Card.Header>
           <h4 className="mb-0">
             <i className="fas fa-map-marked-alt me-2"></i>
-            Nuestra ubicación
+            nuestra ubicacion
           </h4>
         </Card.Header>
         <Card.Body className="p-0">
@@ -223,7 +223,7 @@ export default function Contacto() {
             style={{border: 0}} 
             allowFullScreen 
             loading="lazy"
-            title="Nuestra ubicación en Google Maps"
+            title="nuestra ubicacion en google maps"
           ></iframe>
         </Card.Body>
       </Card>

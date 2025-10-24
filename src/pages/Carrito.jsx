@@ -3,126 +3,113 @@ import { Container, Row, Col, Card, Button, Alert, Badge } from 'react-bootstrap
 import { useAuth } from '../auth/AuthContext'
 
 export default function Carrito() {
-  const { carrito, removeFromCart, clearCart, updateCartItemQuantity } = useAuth()
+  const { carrito, removeFromCart, clearCart, updateCartItemQuantity } = useAuth() // obtengo carrito y funciones del contexto
 
-  // Calcular total
-  const calcularTotal = () => {
-    return carrito.reduce((total, item) => total + (item.precio * (item.cantidad || 1)), 0)
+  const calcularTotal = () => { // funcion para calcular total
+    return carrito.reduce((total, item) => total + (item.precio * (item.cantidad || 1)), 0) // sumo precio por cantidad
   }
 
-  // 🔹 Reducir stock en localStorage cuando se finaliza la compra
-  const actualizarStock = () => {
-    const adminProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]')
-    const defaultProducts = JSON.parse(localStorage.getItem('defaultProductsBackup') || '[]') // respaldo
+  const actualizarStock = () => { // funcion para actualizar stock al finalizar compra
+    const adminProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]') // productos admin
+    const defaultProducts = JSON.parse(localStorage.getItem('defaultProductsBackup') || '[]') // productos por defecto
 
-    const allProducts = mergeDefaultAndAdmin(defaultProducts, adminProducts)
+    const allProducts = mergeDefaultAndAdmin(defaultProducts, adminProducts) // combino productos
 
-    const productosActualizados = allProducts.map(producto => {
-      const itemComprado = carrito.find(c => c.id === producto.id)
+    const productosActualizados = allProducts.map(producto => { // actualizo stock segun carrito
+      const itemComprado = carrito.find(c => c.id === producto.id) // busco item comprado
       if (itemComprado) {
-        const nuevoStock = (producto.stock || 0) - (itemComprado.cantidad || 1)
+        const nuevoStock = (producto.stock || 0) - (itemComprado.cantidad || 1) // resto cantidad comprada
         return { ...producto, stock: Math.max(nuevoStock, 0) } // nunca stock negativo
       }
       return producto
     })
 
-    // separar productos por defecto y personalizados antes de guardar
-    const nuevosDefault = productosActualizados.filter(p => defaultProducts.some(dp => dp.id === p.id))
-    const nuevosAdmin = productosActualizados.filter(p => !defaultProducts.some(dp => dp.id === p.id))
+    const nuevosDefault = productosActualizados.filter(p => defaultProducts.some(dp => dp.id === p.id)) // separo productos por defecto
+    const nuevosAdmin = productosActualizados.filter(p => !defaultProducts.some(dp => dp.id === p.id)) // separo productos admin
 
-    // Guardar los cambios en localStorage
-    localStorage.setItem('adminProducts', JSON.stringify(nuevosAdmin))
-
-    // Guardar respaldo de los productos por defecto (solo si existe)
+    localStorage.setItem('adminProducts', JSON.stringify(nuevosAdmin)) // guardo productos admin
     if (defaultProducts.length > 0) {
-      localStorage.setItem('defaultProductsBackup', JSON.stringify(nuevosDefault))
+      localStorage.setItem('defaultProductsBackup', JSON.stringify(nuevosDefault)) // guardo respaldo productos por defecto
     }
   }
 
-  // 🔹 Combina productos por defecto y personalizados
-  const mergeDefaultAndAdmin = (defaultProducts, adminProducts) => {
-    const defaultMap = new Map(defaultProducts.map(p => [p.id, p]))
-    const adminMap = new Map(adminProducts.map(p => [p.id, p]))
+  const mergeDefaultAndAdmin = (defaultProducts, adminProducts) => { // combino productos por defecto y admin
+    const defaultMap = new Map(defaultProducts.map(p => [p.id, p])) // map de default
+    const adminMap = new Map(adminProducts.map(p => [p.id, p])) // map de admin
 
     const merged = [...defaultMap.values()].map(p =>
-      adminMap.has(p.id) ? adminMap.get(p.id) : p
+      adminMap.has(p.id) ? adminMap.get(p.id) : p // reemplazo default por admin si existe
     )
 
-    adminProducts.forEach(p => {
+    adminProducts.forEach(p => { // agrego productos admin que no estan en default
       if (!defaultMap.has(p.id)) merged.push(p)
     })
 
     return merged
   }
 
-  // Manejar checkout
-  const handleCheckout = () => {
-    if (carrito.length === 0) return
-
-    // Actualiza el stock
-    actualizarStock()
-
-    alert('¡Compra realizada con éxito! Gracias por tu compra en KorteY2K.')
-    clearCart()
+  const handleCheckout = () => { // funcion para finalizar compra
+    if (carrito.length === 0) return // si carrito vacio no hace nada
+    actualizarStock() // actualizo stock
+    alert('compra realizada con exito gracias por tu compra en kortey2k') // mensaje de exito
+    clearCart() // vacio carrito
   }
 
-  const aumentarCantidad = (index) => {
-    const item = carrito[index]
-    const adminProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]')
-    const defaultProducts = JSON.parse(localStorage.getItem('defaultProductsBackup') || '[]')
-    const allProducts = mergeDefaultAndAdmin(defaultProducts, adminProducts)
-    const productoReal = allProducts.find(p => p.id === item.id)
+  const aumentarCantidad = (index) => { // funcion para aumentar cantidad
+    const item = carrito[index] // item actual
+    const adminProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]') // productos admin
+    const defaultProducts = JSON.parse(localStorage.getItem('defaultProductsBackup') || '[]') // productos por defecto
+    const allProducts = mergeDefaultAndAdmin(defaultProducts, adminProducts) // combino productos
+    const productoReal = allProducts.find(p => p.id === item.id) // busco producto real
 
     if (productoReal && (item.cantidad || 1) < productoReal.stock) {
-      updateCartItemQuantity(index, (item.cantidad || 1) + 1)
+      updateCartItemQuantity(index, (item.cantidad || 1) + 1) // aumento cantidad
     } else {
-      alert('⚠️ No hay más stock disponible para este producto.')
+      alert('no hay mas stock disponible para este producto') // aviso si no hay stock
     }
   }
 
-  const disminuirCantidad = (index) => {
-    const item = carrito[index]
+  const disminuirCantidad = (index) => { // funcion para disminuir cantidad
+    const item = carrito[index] // item actual
     if ((item.cantidad || 1) > 1) {
-      updateCartItemQuantity(index, (item.cantidad || 1) - 1)
+      updateCartItemQuantity(index, (item.cantidad || 1) - 1) // disminuyo cantidad
     }
   }
 
   return (
-    <Container>
-      <h2 className="page-title">🛒 Mi Carrito de Compras</h2>
+    <Container> 
+      <h2 className="page-title">mi carrito de compras</h2>
 
-      {carrito.length === 0 ? (
+      {carrito.length === 0 ? ( // si carrito vacio
         <Alert variant="info" className="text-center py-5">
           <div className="py-4">
-            <h4 className="mb-3">Tu carrito está vacío</h4>
-            <p className="text-muted mb-4">Descubre nuestra increíble colección de ropa Y2K</p>
+            <h4 className="mb-3">tu carrito esta vacio</h4>
+            <p className="text-muted mb-4">descubre nuestra increible coleccion de ropa y2k</p>
             <Button variant="primary" href="/productos" size="lg">
-              Explorar Productos
+              explorar productos
             </Button>
           </div>
         </Alert>
-      ) : (
+      ) : ( // si carrito tiene productos
         <Row>
-          <Col lg={8}>
-            <Card className="mb-4">
+          <Col lg={8}> 
+            <Card className="mb-4"> 
               <Card.Header className="bg-white">
                 <h5 className="mb-0">
-                  Productos en el carrito ({carrito.reduce((total, item) => total + (item.cantidad || 1), 0)} items)
+                  productos en el carrito ({carrito.reduce((total, item) => total + (item.cantidad || 1), 0)} items)
                 </h5>
               </Card.Header>
               <Card.Body className="p-0">
-                {carrito.map((item, index) => (
+                {carrito.map((item, index) => ( // recorro items del carrito
                   <div key={`${item.id}-${index}`} className="carrito-item">
                     <Row className="align-items-center">
                       <Col md={3}>
                         <img
-                          src={item.imagen}
-                          alt={item.nombre}
+                          src={item.imagen} // imagen producto
+                          alt={item.nombre} // alt
                           className="rounded-3 w-100"
                           style={{ height: '120px', objectFit: 'cover' }}
-                          onError={(e) => {
-                            e.target.src = 'https://via.placeholder.com/200x200?text=Imagen+no+disponible'
-                          }}
+                          onError={(e) => { e.target.src = 'https://via.placeholder.com/200x200?text=imagen no disponible' }} // fallback imagen
                         />
                       </Col>
 
@@ -147,8 +134,8 @@ export default function Carrito() {
                           <Button
                             variant="outline-secondary"
                             size="sm"
-                            onClick={() => disminuirCantidad(index)}
-                            disabled={(item.cantidad || 1) <= 1}
+                            onClick={() => disminuirCantidad(index)} // boton restar
+                            disabled={(item.cantidad || 1) <= 1} // deshabilitado si cantidad 1
                           >
                             -
                           </Button>
@@ -156,7 +143,7 @@ export default function Carrito() {
                           <Button
                             variant="outline-secondary"
                             size="sm"
-                            onClick={() => aumentarCantidad(index)}
+                            onClick={() => aumentarCantidad(index)} // boton sumar
                           >
                             +
                           </Button>
@@ -167,7 +154,7 @@ export default function Carrito() {
                         <Button
                           variant="outline-danger"
                           size="sm"
-                          onClick={() => removeFromCart(index)}
+                          onClick={() => removeFromCart(index)} // boton eliminar item
                           className="border-0"
                         >
                           🗑️
@@ -181,10 +168,10 @@ export default function Carrito() {
 
             <div className="d-flex gap-3">
               <Button variant="outline-secondary" onClick={clearCart}>
-                Vaciar Carrito
+                vaciar carrito
               </Button>
               <Button variant="outline-primary" href="/productos">
-                Seguir Comprando
+                seguir comprando
               </Button>
             </div>
           </Col>
@@ -192,22 +179,22 @@ export default function Carrito() {
           <Col lg={4}>
             <Card className="carrito-total">
               <Card.Body>
-                <h5 className="mb-4 text-center">Resumen de Compra</h5>
+                <h5 className="mb-4 text-center">resumen de compra</h5>
 
                 <div className="d-flex justify-content-between mb-3">
-                  <span>Subtotal:</span>
+                  <span>subtotal</span>
                   <span>${calcularTotal().toLocaleString('es-CL')}</span>
                 </div>
 
                 <div className="d-flex justify-content-between mb-3">
-                  <span>Envío:</span>
-                  <span className="text-success">Gratis</span>
+                  <span>envio</span>
+                  <span className="text-success">gratis</span>
                 </div>
 
                 <hr className="my-3" />
 
                 <div className="d-flex justify-content-between mb-4">
-                  <strong>Total:</strong>
+                  <strong>total</strong>
                   <strong className="fs-4">
                     ${calcularTotal().toLocaleString('es-CL')}
                   </strong>
@@ -217,14 +204,14 @@ export default function Carrito() {
                   variant="light"
                   size="lg"
                   className="w-100 fw-bold"
-                  onClick={handleCheckout}
+                  onClick={handleCheckout} // boton finalizar compra
                 >
-                  Finalizar Compra
+                  finalizar compra
                 </Button>
 
                 <div className="text-center mt-3">
                   <small className="opacity-75">
-                    ✅ Envío gratis en compras sobre $20.000
+                    envio gratis en compras sobre $20000
                   </small>
                 </div>
               </Card.Body>

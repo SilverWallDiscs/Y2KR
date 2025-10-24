@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { Container, Row, Col, Card } from 'react-bootstrap'
-import Carousel from 'react-bootstrap/Carousel';
-
-
+import Carousel from 'react-bootstrap/Carousel'
 
 export default function Home() {
-  const [featuredProducts, setFeaturedProducts] = useState([])
+  const [featuredProducts, setFeaturedProducts] = useState([]) // estado productos destacados
 
-  useEffect(() => {
-    const loadFeaturedProducts = () => {
-      const productosAdmin = JSON.parse(localStorage.getItem('adminProducts') || '[]')
-      const defaultProducts = [
+  useEffect(() => { // efecto para cargar productos al iniciar y cuando cambie localstorage
+    const loadFeaturedProducts = () => { // funcion para cargar productos destacados
+      const productosAdmin = JSON.parse(localStorage.getItem('adminProducts') || '[]') // productos admin en localstorage
+      const defaultProducts = [ // productos por defecto
         {
           id: 1,
           nombre: "Polera Oversize",
@@ -40,23 +38,23 @@ export default function Home() {
         }
       ]
       
-      const productosActualizados = defaultProducts.map(producto => {
+      const productosActualizados = defaultProducts.map(producto => { // reemplazo productos por los de admin si existen
         const productoActualizado = productosAdmin.find(p => p.id === producto.id)
         return productoActualizado || producto
       })
       
-      setFeaturedProducts(productosActualizados)
+      setFeaturedProducts(productosActualizados) // actualizo estado
     }
 
-    loadFeaturedProducts()
+    loadFeaturedProducts() // cargo productos al iniciar
     
-    const handleStorageChange = () => {
+    const handleStorageChange = () => { // funcion para actualizar productos si cambia localstorage
       loadFeaturedProducts()
     }
     
-    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('storage', handleStorageChange) // escucho cambios en localstorage
     
-    return () => {
+    return () => { // limpio listener al desmontar componente
       window.removeEventListener('storage', handleStorageChange)
     }
   }, [])
@@ -70,57 +68,56 @@ export default function Home() {
         </Col>
       </Row>
       
-      {/* Hero Section */}
-    <Carousel className="mb-5">
-      <Carousel.Item>
-        <img
-          className="d-block w-100"
-          src="/assets/Fondo1.webp"
-          alt="Primera diapositiva"
-          style={{ maxHeight: '500px', objectFit: 'cover' }}
-          onError={(e) => { e.target.src = 'https://via.placeholder.com/800x500?text=Imagen+no+disponible' }}
-        />
-        <Carousel.Caption>
-          <h3>Primera Colección</h3>
-          <p>Descubre nuestra línea urbana Y2K con estilo y actitud.</p>
-        </Carousel.Caption>
-      </Carousel.Item>
-      
-      <Carousel.Item>
-        <img
-          className="d-block w-100"
-          src="/assets/Fondo5.jpg "
-          alt="Segunda diapositiva"
-          style={{ maxHeight: '500px', objectFit: 'cover' }}
-          onError={(e) => { e.target.src = 'https://via.placeholder.com/800x500?text=Imagen+no+disponible' }}
-        />
-        <Carousel.Caption>
-          <h3>Nueva Temporada</h3>
-          <p>Looks frescos, cómodos y con mucha onda.</p>
-        </Carousel.Caption>
-      </Carousel.Item>
+      {/* hero section */}
+      <Carousel className="mb-5">
+        <Carousel.Item>
+          <img
+            className="d-block w-100"
+            src="/assets/Fondo1.webp"
+            alt="primera diapositiva"
+            style={{ maxHeight: '500px', objectFit: 'cover' }}
+            onError={(e) => { e.target.src = 'https://via.placeholder.com/800x500?text=Imagen+no+disponible' }} // fallback imagen
+          />
+          <Carousel.Caption>
+            <h3>Primera Colección</h3>
+            <p>Descubre nuestra línea urbana Y2K con estilo y actitud</p>
+          </Carousel.Caption>
+        </Carousel.Item>
+        
+        <Carousel.Item>
+          <img
+            className="d-block w-100"
+            src="/assets/Fondo5.jpg "
+            alt="segunda diapositiva"
+            style={{ maxHeight: '500px', objectFit: 'cover' }}
+            onError={(e) => { e.target.src = 'https://via.placeholder.com/800x500?text=Imagen+no+disponible' }}
+          />
+          <Carousel.Caption>
+            <h3>Nueva Temporada</h3>
+            <p>Looks frescos cómodos y con mucha onda</p>
+          </Carousel.Caption>
+        </Carousel.Item>
 
-      <Carousel.Item>
-        <img
-          className="d-block w-100"
-          src="/assets/Fondo2.jpg"
-          alt="Tercera diapositiva"
-          style={{ maxHeight: '500px', objectFit: 'cover' }}
-          onError={(e) => { e.target.src = 'https://via.placeholder.com/800x500?text=Imagen+no+disponible' }}
-        />
-        <Carousel.Caption>
-          <h3>¡Exprésate!</h3>
-          <p>Moda que refleja tu personalidad.</p>
-        </Carousel.Caption>
-      </Carousel.Item>
-    </Carousel>
+        <Carousel.Item>
+          <img
+            className="d-block w-100"
+            src="/assets/Fondo2.jpg"
+            alt="tercera diapositiva"
+            style={{ maxHeight: '500px', objectFit: 'cover' }}
+            onError={(e) => { e.target.src = 'https://via.placeholder.com/800x500?text=Imagen+no+disponible' }}
+          />
+          <Carousel.Caption>
+            <h3>¡Exprésate!</h3>
+            <p>Moda que refleja tu personalidad</p>
+          </Carousel.Caption>
+        </Carousel.Item>
+      </Carousel>
 
-      
-      {/* Productos Destacados */}
+      {/* productos destacados */}
       <section className="productos-destacados mb-5">
         <h2 className="text-center mb-4">Productos Destacados</h2>
         <Row>
-          {featuredProducts.map((producto) => (
+          {featuredProducts.map((producto) => ( // recorro productos destacados
             <Col key={producto.id} md={4} className="mb-4">
               <Card className="h-100 producto-card">
                 <Card.Img 
@@ -128,12 +125,10 @@ export default function Home() {
                   src={producto.imagen} 
                   alt={producto.nombre}
                   style={{ height: '500px', objectFit: 'cover' }}
-                  onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/300x250?text=Imagen+no+disponible'
-                  }}
+                  onError={(e) => { e.target.src = 'https://via.placeholder.com/300x250?text=Imagen+no+disponible' }} // fallback imagen
                 />
                 <Card.Body className="d-flex flex-column">
-                  <Card.Title className="producto-nombre">{producto.nombre}</Card.Title>
+                  <Card.Title className="producto-nombre">{producto.nombre}</Card.Title> 
                   <Card.Text className="text-muted producto-precio">
                     ${producto.precio.toLocaleString('es-CL')}
                   </Card.Text>

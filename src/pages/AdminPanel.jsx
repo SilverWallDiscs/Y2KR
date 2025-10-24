@@ -130,7 +130,6 @@ export default function AdminPanel() {
 
   const loadStats = () => {
     const savedSalesData = JSON.parse(localStorage.getItem('salesData') || '[]')
-    const totalSales = savedSalesData.reduce((sum, sale) => sum + sale.amount, 0)
     const revenue = savedSalesData.reduce((sum, sale) => sum + sale.revenue, 0)
     
     const totalValue = products.reduce((sum, p) => sum + (p.precio * (p.stock || 1)), 0)
