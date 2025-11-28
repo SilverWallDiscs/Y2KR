@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { Container, Row, Col, Card, Form, Button, Alert, Tab, Tabs, Table, Modal, Badge } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 
+// Función para generar productoid aleatorio de 6 dígitos
+const generateProductId = () => {
+  return Math.floor(100000 + Math.random() * 900000);
+};
+
 export default function AdminPanel() {
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
@@ -16,7 +21,7 @@ export default function AdminPanel() {
     stock: ''
   })
   const [message, setMessage] = useState({ text: '', type: '' })
-  const [imagePreview, setImagePreview] = useState('') // Para la preview de la imagen
+  const [imagePreview, setImagePreview] = useState('')
 
   const defaultProducts = [
     {
@@ -101,26 +106,168 @@ export default function AdminPanel() {
     }
     loadProducts()
     loadSalesData()
-    loadStats()
   }, [navigate])
+
+  // Función para guardar en la base de datos (POST /inventario)
+  const saveToDatabase = async (product) => {
+    try {
+      const data = {
+        productoid: Number(product.id),
+        stock: Number(product.stock || 0),
+        precio: Number(product.precio)
+      }
+      
+      console.log('📤 POST /api/inventario:', data)
+      
+      const response = await fetch('/api/inventario', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      })
+
+      console.log('📥 Status:', response.status)
+      
+      if (response.ok) {
+        const result = await response.json()
+        console.log('✅ Guardado en BD:', result)
+        return result
+      } else {
+        const errorText = await response.text()
+        console.error('❌ Error en POST:', response.status, errorText)
+        
+        // Si el producto ya existe, intentar actualizarlo
+        if (response.status === 400 || response.status === 409) {
+          console.log('🔄 Producto posiblemente ya existe, intentando PUT...')
+          return await updateInDatabase(product)
+        }
+        
+        return null
+      }
+      
+    } catch (error) {
+      console.error('💥 Error de conexión:', error.message)
+      return null
+    }
+  }
+
+  // Función para actualizar en la base de datos (PUT /inventario)
+  const updateInDatabase = async (product) => {
+    try {
+      const data = {
+        productoid: Number(product.id),
+        stock: Number(product.stock || 0),
+        precio: Number(product.precio)
+      }
+      
+      console.log('📤 PUT /api/inventario:', data)
+      
+      const response = await fetch('/api/inventario', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      })
+
+      console.log('📥 Status:', response.status)
+      
+      if (response.ok) {
+        const result = await response.json()
+        console.log('✅ Actualizado en BD:', result)
+        return result
+      } else {
+        const errorText = await response.text()
+        console.error('❌ Error en PUT:', response.status, errorText)
+        return null
+      }
+      
+    } catch (error) {
+      console.error('💥 Error de conexión:', error.message)
+      return null
+    }
+  }
+
+  // Función para verificar si un producto existe en la base de datos
+  const checkProductExists = async (productId) => {
+    try {
+      console.log('🔍 Verificando inventario completo...')
+      
+      const response = await fetch('/api/inventario')
+      
+      if (response.ok) {
+        const inventario = await response.json()
+        console.log('📋 Inventario completo:', inventario)
+        
+        const productoExiste = inventario.some(item => item.productoid === productId)
+        console.log(`🔍 Producto ${productId} existe:`, productoExiste)
+        
+        return productoExiste
+      }
+      
+      return false
+      
+    } catch (error) {
+      console.error('💥 Error verificando producto:', error.message)
+      return false
+    }
+  }
+
+  // Función para eliminar de la base de datos (DELETE /inventario/{productoid})
+  const deleteFromDatabase = async (productId) => {
+    try {
+      // Primero verificar si el producto existe
+      const existe = await checkProductExists(productId)
+      
+      if (!existe) {
+        console.log(`⚠️ Producto ${productId} no existe en BD, no se puede eliminar`)
+        return null
+      }
+      
+      console.log('📤 DELETE /api/inventario/' + productId)
+      
+      const response = await fetch(`/api/inventario/${productId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+
+      console.log('📥 Status:', response.status)
+      
+      if (response.ok) {
+        const result = await response.json()
+        console.log('✅ Eliminado de BD:', result)
+        return result
+      } else {
+        const errorText = await response.text()
+        console.error('❌ Error en DELETE:', response.status, errorText)
+        return null
+      }
+      
+    } catch (error) {
+      console.error('💥 Error de conexión:', error.message)
+      return null
+    }
+  }
 
   const loadProducts = () => {
     const adminProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]')
     
-    const defaultProductsMap = new Map(defaultProducts.map(p => [p.id, p]))
-    const adminProductsMap = new Map(adminProducts.map(p => [p.id, p]))
-    
-    const combinedProducts = [...defaultProductsMap.values()].map(product => {
-      return adminProductsMap.has(product.id) ? adminProductsMap.get(product.id) : product
-    })
+    const combinedProducts = [...defaultProducts]
     
     adminProducts.forEach(adminProduct => {
-      if (!defaultProductsMap.has(adminProduct.id)) {
+      const index = combinedProducts.findIndex(p => p.id === adminProduct.id)
+      if (index !== -1) {
+        combinedProducts[index] = adminProduct
+      } else {
         combinedProducts.push(adminProduct)
       }
     })
     
     setProducts(combinedProducts)
+    loadStats(combinedProducts)
   }
 
   const loadSalesData = () => {
@@ -128,15 +275,15 @@ export default function AdminPanel() {
     setSalesData(savedSalesData)
   }
 
-  const loadStats = () => {
+  const loadStats = (productsData = products) => {
     const savedSalesData = JSON.parse(localStorage.getItem('salesData') || '[]')
     const revenue = savedSalesData.reduce((sum, sale) => sum + sale.revenue, 0)
     
-    const totalValue = products.reduce((sum, p) => sum + (p.precio * (p.stock || 1)), 0)
-    const lowStock = products.filter(p => (p.stock || 0) < 5).length
+    const totalValue = productsData.reduce((sum, p) => sum + (p.precio * (p.stock || 1)), 0)
+    const lowStock = productsData.filter(p => (p.stock || 0) < 5).length
 
     setStats({
-      totalProducts: products.length,
+      totalProducts: productsData.length,
       totalValue: totalValue,
       totalSales: savedSalesData.length,
       revenue: revenue,
@@ -164,9 +311,9 @@ export default function AdminPanel() {
       reader.onload = (event) => {
         setNewProduct({
           ...newProduct,
-          imagen: event.target.result // Almacena la data URL
+          imagen: event.target.result
         })
-        setImagePreview(event.target.result) // Para la preview
+        setImagePreview(event.target.result)
       }
       reader.readAsDataURL(file)
     }
@@ -174,60 +321,78 @@ export default function AdminPanel() {
 
   const handleAddProduct = (e) => {
     e.preventDefault()
+    console.log('Intentando guardar producto...')
     
-    const precio = parseFloat(newProduct.precio)
-    if (precio < 10000 || precio > 500000 || precio % 10 !== 0) {
-      setMessage({ text: 'El precio debe estar entre 10,000 y 500,000, y ser múltiplo de 10', type: 'danger' })
+    // Validaciones básicas
+    if (!newProduct.nombre || !newProduct.precio || !newProduct.categoria) {
+      setMessage({ text: 'Por favor completa los campos obligatorios', type: 'danger' })
       return
     }
 
-    if (!newProduct.nombre || !newProduct.imagen || !newProduct.categoria) {
-      setMessage({ text: 'Por favor completa todos los campos obligatorios', type: 'danger' })
+    const precio = parseFloat(newProduct.precio)
+    if (isNaN(precio) || precio < 0) {
+      setMessage({ text: 'El precio debe ser un número válido', type: 'danger' })
       return
+    }
+
+    // Generar ID para nuevo producto
+    let productId
+    if (editingProduct) {
+      productId = editingProduct.id
+    } else {
+      productId = generateProductId()
+      // Verificar que el ID no exista
+      const allProducts = [...defaultProducts, ...JSON.parse(localStorage.getItem('adminProducts') || '[]')]
+      while (allProducts.some(p => p.id === productId)) {
+        productId = generateProductId()
+      }
     }
 
     const product = {
-      id: editingProduct ? editingProduct.id : Date.now(),
+      id: productId,
       nombre: newProduct.nombre,
       precio: precio,
-      imagen: newProduct.imagen,
+      imagen: newProduct.imagen || '/assets/placeholder.jpg',
       categoria: newProduct.categoria,
-      descripcion: newProduct.descripcion,
+      descripcion: newProduct.descripcion || '',
       stock: parseInt(newProduct.stock) || 0
     }
 
+    console.log('Producto a guardar:', product)
+
+    // Guardar en localStorage
     const adminProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]')
     
     if (editingProduct) {
-      const isDefaultProduct = defaultProducts.some(p => p.id === editingProduct.id)
+      // Editar producto existente
+      const updatedProducts = adminProducts.map(p => 
+        p.id === editingProduct.id ? product : p
+      )
+      localStorage.setItem('adminProducts', JSON.stringify(updatedProducts))
       
-      if (isDefaultProduct) {
-        const existingIndex = adminProducts.findIndex(p => p.id === editingProduct.id)
-        if (existingIndex >= 0) {
-          adminProducts[existingIndex] = product
-        } else {
-          adminProducts.push(product)
-        }
-      } else {
-        const updatedProducts = adminProducts.map(p => 
-          p.id === editingProduct.id ? product : p
-        )
-        localStorage.setItem('adminProducts', JSON.stringify(updatedProducts))
-      }
+      // Actualizar en base de datos - usar PUT
+      updateInDatabase(product)
+      
       setMessage({ text: 'Producto actualizado correctamente', type: 'success' })
     } else {
+      // Agregar nuevo producto
       adminProducts.push(product)
       localStorage.setItem('adminProducts', JSON.stringify(adminProducts))
-      setMessage({ text: 'Producto agregado correctamente', type: 'success' })
+      
+      // Guardar en base de datos - usar POST
+      saveToDatabase(product)
+      
+      setMessage({ text: `Producto agregado correctamente (ID: ${productId})`, type: 'success' })
     }
 
-    localStorage.setItem('adminProducts', JSON.stringify(adminProducts))
+    // Limpiar y cerrar
     setNewProduct({ nombre: '', precio: '', imagen: '', categoria: '', descripcion: '', stock: '' })
     setImagePreview('')
     setEditingProduct(null)
     setShowModal(false)
+    
+    // Recargar productos
     loadProducts()
-    loadStats()
 
     setTimeout(() => setMessage({ text: '', type: '' }), 3000)
   }
@@ -236,13 +401,13 @@ export default function AdminPanel() {
     setEditingProduct(product)
     setNewProduct({
       nombre: product.nombre,
-      precio: product.precio,
+      precio: product.precio.toString(),
       imagen: product.imagen,
       categoria: product.categoria,
       descripcion: product.descripcion || '',
-      stock: product.stock || ''
+      stock: product.stock?.toString() || ''
     })
-    setImagePreview(product.imagen) // Mostrar preview al editar
+    setImagePreview(product.imagen)
     setShowModal(true)
   }
 
@@ -262,8 +427,11 @@ export default function AdminPanel() {
       const adminProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]')
       const updatedProducts = adminProducts.filter(p => p.id !== productId)
       localStorage.setItem('adminProducts', JSON.stringify(updatedProducts))
+      
+      // Eliminar de la base de datos
+      deleteFromDatabase(productId)
+      
       loadProducts()
-      loadStats()
       setMessage({ text: 'Producto eliminado correctamente', type: 'success' })
       setTimeout(() => setMessage({ text: '', type: '' }), 3000)
     }
@@ -496,7 +664,7 @@ export default function AdminPanel() {
                 <Card.Body>
                   <Row>
                     <Col md={6}>
-                                            <h6>Ingresos Totales</h6>
+                      <h6>Ingresos Totales</h6>
                       <h3 className="text-success">${stats.revenue.toLocaleString('es-CL')}</h3>
                     </Col>
                     <Col md={6}>
@@ -658,9 +826,8 @@ export default function AdminPanel() {
                     name="precio"
                     value={newProduct.precio}
                     onChange={handleInputChange}
-                    min="10000"
-                    max="500000"
-                    step="10"
+                    min="0"
+                    step="100"
                     required
                     placeholder="Ej: 10000"
                   />
@@ -683,22 +850,21 @@ export default function AdminPanel() {
               )}
             </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Categoría *</Form.Label>
-            <Form.Select
-              name="categoria"
-              value={newProduct.categoria}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Seleccionar categoría</option>
-              <option value="Poleras">👚 Poleras</option>
-              <option value="Poleron">🧥 Poleron</option>
-              <option value="Pantalones">👖 Pantalones</option>
-              <option value="Accesorios">🧢 Accesorios</option>
-            </Form.Select>
-          </Form.Group>
-
+            <Form.Group className="mb-3">
+              <Form.Label>Categoría *</Form.Label>
+              <Form.Select
+                name="categoria"
+                value={newProduct.categoria}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Seleccionar categoría</option>
+                <option value="Poleras">👚 Poleras</option>
+                <option value="Poleron">🧥 Poleron</option>
+                <option value="Pantalones">👖 Pantalones</option>
+                <option value="Accesorios">🧢 Accesorios</option>
+              </Form.Select>
+            </Form.Group>
 
             <Form.Group className="mb-3">
               <Form.Label>Descripción</Form.Label>
@@ -711,18 +877,17 @@ export default function AdminPanel() {
                 placeholder="Describe el producto..."
               />
             </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Stock</Form.Label>
-                <Form.Control
-                  type="number"
-                  name="stock"
-                  value={newProduct.stock}
-                  onChange={handleInputChange}
-                  min="0"
-                  required
-                  placeholder="Ej: 10"
-                />
-              </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Stock</Form.Label>
+              <Form.Control
+                type="number"
+                name="stock"
+                value={newProduct.stock}
+                onChange={handleInputChange}
+                min="0"
+                placeholder="Ej: 10"
+              />
+            </Form.Group>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleCloseModal}>
